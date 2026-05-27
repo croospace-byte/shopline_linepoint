@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>點數回饋｜SHOPLINE 商店管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --primary:#1875F0; --primary-hover:#0F65D8; --primary-soft:#E8F1FE;
+    --sidebar-bg:#1F2937; --sidebar-hover:#374151; --sidebar-text:#D1D5DB;
+    --topbar-bg:#FFFFFF; --page-bg:#F5F7FA; --card-bg:#FFFFFF;
+    --border:#E5E7EB; --text-1:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
+    --success:#16A34A; --warning:#EA580C; --danger:#DC2626;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Segoe UI",sans-serif;color:var(--text-1);background:var(--page-bg);font-size:14px;line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:240px;background:var(--sidebar-bg);color:var(--sidebar-text);flex-shrink:0;display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+  .main-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:56px;background:var(--topbar-bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:5}
+  .content{flex:1;padding:24px;overflow:auto}
+
+  .brand{padding:16px 20px;font-weight:700;font-size:18px;color:#fff;border-bottom:1px solid #374151;display:flex;align-items:center;gap:10px}
+  .brand .logo{width:24px;height:24px;background:var(--primary);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800}
+  .nav{flex:1;overflow-y:auto;padding:8px 0}
+  .nav-section{padding:10px 20px 4px;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .nav .nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;color:var(--sidebar-text);font-size:13px;cursor:pointer;border-left:3px solid transparent}
+  .nav .nav-item:hover{background:var(--sidebar-hover);color:#fff}
+  .nav-disabled{opacity:.55;cursor:default !important}
+  .nav-disabled:hover{background:transparent !important;color:var(--sidebar-text) !important}
+  .nav-group-head{display:flex;align-items:center;gap:10px;padding:8px 20px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;background:#111827}
+  .nav-sub{background:#1A2330}
+  .nav-sub .nav-item{padding-left:46px;font-size:13px}
+  .nav-sub .nav-item.active{background:var(--sidebar-hover);color:#fff;border-left-color:var(--primary)}
+  .pill-app{margin-left:auto;font-size:10px;background:rgba(255,255,255,.12);padding:2px 6px;border-radius:4px;color:#fff;font-weight:500}
+
+  .breadcrumb{display:flex;align-items:center;gap:8px;color:var(--text-2);font-size:13px}
+  .breadcrumb .sep{color:var(--text-3)}
+  .breadcrumb .here{color:var(--text-1);font-weight:600}
+  .topbar-right{display:flex;align-items:center;gap:16px}
+  .shop-label{font-size:13px;color:var(--text-2)}
+  .shop-label strong{color:var(--text-1)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1875F0,#7E5EE5);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+  .bell{width:22px;height:22px;border-radius:50%;background:#F3F4F6;display:inline-flex;align-items:center;justify-content:center;color:#4B5563;font-size:14px}
+
+  .page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+  .page-title{font-size:22px;font-weight:700;margin:0 0 4px;color:var(--text-1)}
+  .page-desc{color:var(--text-2);font-size:13px;margin:0;max-width:780px}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text-1);transition:all .15s}
+  .btn:hover{background:#F9FAFB}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn.primary:hover{background:var(--primary-hover);border-color:var(--primary-hover)}
+  .btn.danger{color:var(--danger);border-color:#FCA5A5}
+  .btn.danger:hover{background:#FEF2F2}
+  .btn.primary.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .btn.primary.danger:hover{background:#B91C1C}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--text-2)}
+  .btn.ghost:hover{background:#F3F4F6;color:var(--text-1)}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+
+  .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:20px;box-shadow:var(--shadow-sm)}
+  .card-row{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+  .metric{flex:1;min-width:200px}
+  .metric .label{font-size:12px;color:var(--text-2);margin-bottom:6px}
+  .metric .value{font-size:26px;font-weight:700;color:var(--text-1)}
+  .metric .delta{font-size:12px;margin-top:4px;color:var(--success)}
+  .metric .delta.down{color:var(--danger)}
+  .metric .sub{font-size:11px;color:var(--text-3);margin-top:2px}
+
+  .table-card{padding:0;overflow:visible}
+  .table-head-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+  .table-title{font-size:15px;font-weight:600;margin:0}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+  th{background:#F9FAFB;font-weight:600;color:var(--text-2);font-size:12px;user-select:none}
+  th.sortable{cursor:pointer;position:relative;padding-right:24px}
+  th.sortable:hover{background:#F3F4F6;color:var(--text-1)}
+  th.sortable .sort-ic{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:11px;line-height:1}
+  th.sortable.asc .sort-ic{color:var(--primary)}
+  th.sortable.desc .sort-ic{color:var(--primary)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#FAFBFC}
+  tr.clickable{cursor:pointer}
+  .cell-strong{font-weight:600;color:var(--text-1)}
+  .muted{color:var(--text-3);font-size:12px}
+  .col-center{text-align:center !important}
+
+  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+  .badge.green{background:#DCFCE7;color:#16A34A}
+  .badge.yellow{background:#FEF3C7;color:#B45309}
+  .badge.gray{background:#F3F4F6;color:#6B7280}
+  .badge.blue{background:#DBEAFE;color:#1D4ED8}
+  .badge.red{background:#FEE2E2;color:#B91C1C}
+
+  .toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;cursor:pointer}
+  .toggle input{opacity:0;width:0;height:0}
+  .toggle .slider{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:20px;transition:.2s}
+  .toggle .slider::before{position:absolute;content:"";height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .toggle input:checked + .slider{background:var(--primary)}
+  .toggle input:checked + .slider::before{transform:translateX(16px)}
+
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+  .tab{padding:12px 20px;font-size:14px;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+  .tab:hover{color:var(--text-1)}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+  .form-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+  .field{flex:1;min-width:180px}
+  .field label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text-1);margin-bottom:6px}
+  .field label .req{color:var(--danger);margin-left:2px}
+  .field .hint{font-size:11px;color:var(--text-3);margin-top:4px;display:flex;align-items:center;gap:4px}
+  .input,.select,.textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;background:#fff}
+  .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+  .input[disabled],.select[disabled]{background:#F3F4F6;color:var(--text-3);cursor:not-allowed}
+  .textarea{resize:vertical;min-height:80px}
+  .radio-group{display:flex;gap:18px;padding:6px 0}
+  .check-row{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+
+  .tip-ic{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#E5E7EB;color:#6B7280;font-size:10px;font-weight:700;cursor:help;position:relative}
+  .tip-ic:hover .tip-text{opacity:1;visibility:visible}
+  .tip-text{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1F2937;color:#fff;padding:6px 10px;font-size:11px;font-weight:400;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .15s;z-index:100;pointer-events:none;line-height:1.5}
+  .tip-text::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1F2937}
+
+  .modal-back{position:fixed;inset:0;background:rgba(17,24,39,.4);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+  .modal-back.show{display:flex}
+  .modal{background:#fff;border-radius:10px;width:620px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.15)}
+  .modal.lg{width:780px}
+  .modal.xl{width:880px}
+  .modal.sm{width:440px}
+  .modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#fff;position:sticky;top:0;z-index:2}
+  .modal-head .t{font-size:16px;font-weight:600;margin:0}
+  .modal-close{background:none;border:none;font-size:20px;color:var(--text-3);cursor:pointer;padding:0;line-height:1}
+  .modal-body{padding:22px;overflow:auto;flex:1}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:#FAFBFC;flex-shrink:0}
+  .modal-back.layer-2{z-index:60}
+
+  .filter-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:14px 20px;background:#FAFBFC;border-bottom:1px solid var(--border)}
+  .filter-inline{display:flex;align-items:center;gap:8px}
+  .filter-inline label{font-size:12px;color:var(--text-2);white-space:nowrap;margin:0;font-weight:500}
+  .filter-inline .select,.filter-inline .input{padding:6px 10px;min-width:140px}
+  .filter-bar .actions{display:flex;gap:8px;margin-left:auto}
+
+  .embed-banner{background:linear-gradient(90deg,#E8F1FE,#FFF);padding:10px 24px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-2);display:flex;justify-content:space-between;align-items:center}
+  .embed-banner .left{display:flex;gap:10px;align-items:center}
+  .embed-banner .dot{width:8px;height:8px;background:var(--primary);border-radius:50%}
+
+  .view{display:none}
+  .view.active{display:block}
+
+  .info-line{display:block;padding:12px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;font-size:12px;color:#92400E;margin-bottom:16px;line-height:1.7}
+  .info-line.tip{background:#E8F1FE;border-color:#BFDBFE;color:#1E40AF}
+
+  .range-section{display:none;padding:12px;background:#F9FAFB;border:1px dashed var(--border);border-radius:6px;margin-top:8px;margin-bottom:16px}
+  .range-section.show{display:block}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:12px;margin:3px}
+  .chip .x{cursor:pointer;color:var(--text-3);font-weight:bold}
+  .chip-row{display:flex;flex-wrap:wrap;gap:0;align-items:center}
+
+  .chart-area{height:200px;display:flex;align-items:flex-end;gap:8px;padding:14px 0;border-bottom:1px dashed var(--border)}
+  .bar{flex:1;background:linear-gradient(180deg,#3B82F6,#1875F0);border-radius:4px 4px 0 0;position:relative;min-height:6px}
+  .bar.bar-2{background:linear-gradient(180deg,#34D399,#16A34A)}
+  .bar:hover{filter:brightness(1.1)}
+  .bar .v{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-2);white-space:nowrap}
+  .chart-x{display:flex;gap:8px;padding-top:6px;font-size:11px;color:var(--text-3)}
+  .chart-x span{flex:1;text-align:center}
+
+  /* Progress bar (for 預算欄) */
+  .pgr{display:flex;flex-direction:column;gap:4px;min-width:160px}
+  .pgr-bar{position:relative;height:18px;background:#F3F4F6;border-radius:10px;overflow:hidden}
+  .pgr-fill{height:100%;background:linear-gradient(90deg,#3B82F6,#1875F0)}
+  .pgr-fill.warn{background:linear-gradient(90deg,#F59E0B,#EA580C)}
+  .pgr-fill.danger{background:linear-gradient(90deg,#EF4444,#DC2626)}
+  .pgr-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-1);mix-blend-mode:luminosity}
+  .pgr-txt{font-size:11px;color:var(--text-2)}
+
+  /* Pagination */
+  .pagi{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid var(--border);background:#FAFBFC}
+  .pagi-info{color:var(--text-3);font-size:12px}
+  .pagi-pages{display:flex;gap:4px}
+  .pagi-btn{min-width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;font-size:13px;cursor:pointer;color:var(--text-1);border-radius:6px;padding:0 8px}
+  .pagi-btn:hover{background:#F3F4F6}
+  .pagi-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .pagi-btn[disabled]{opacity:.4;cursor:not-allowed;background:#fff}
+
+  /* Category / Product picker dual panel */
+  .picker-toolbar{display:flex;align-items:center;gap:10px;padding:0 22px 12px;font-size:13px}
+  .picker-toolbar .sel-count{color:var(--warning);font-weight:600}
+  .picker-toolbar .link{color:var(--primary);cursor:pointer;font-weight:500}
+  .picker-toolbar .right{margin-left:auto;color:var(--text-2);cursor:pointer}
+  .picker-panels{display:flex;height:420px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .picker-left{width:50%;overflow:auto;background:#F9FAFB;border-right:1px solid var(--border)}
+  .picker-right{width:50%;overflow:auto;background:#fff}
+  .pl-item{padding:14px 20px;border-bottom:1px solid #EAECEF;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--text-1)}
+  .pl-item:hover{background:#fff}
+  .pl-item.active{background:#fff;color:var(--primary);font-weight:600}
+  .pl-item .arrow{color:var(--text-3)}
+  .pl-item .count-pill{display:none;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;background:var(--warning);color:#fff;font-size:11px;font-weight:600;padding:0 6px;margin-right:8px}
+  .pl-item.has-sel .count-pill{display:inline-flex}
+  .pr-item{padding:12px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px dashed #F0F0F0;font-size:14px}
+  .pr-item:last-child{border-bottom:none}
+  .pr-item input[type="checkbox"]{width:16px;height:16px;cursor:pointer}
+  .picker-search{padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+  .picker-search input{flex:1;border:none;outline:none;font-size:14px}
+
+  .dt-line{font-size:13px}
+  .dt-line + .dt-line{color:var(--text-3);font-size:12px}
+
+  .date-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px;color:var(--text-1);cursor:pointer}
+  .date-pill:hover{border-color:var(--primary)}
+
+  .breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .bd-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:18px}
+  .bd-card h4{font-size:14px;margin:0 0 12px;font-weight:600}
+  .bd-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border);font-size:13px}
+  .bd-row:last-child{border-bottom:none}
+  .bd-name{color:var(--text-1)}
+  .bd-pct{display:flex;align-items:center;gap:10px;min-width:160px;justify-content:flex-end}
+  .bd-bar-wrap{width:80px;height:6px;background:#F3F4F6;border-radius:4px;overflow:hidden}
+  .bd-bar{height:100%;background:var(--primary)}
+  .bd-val{color:var(--text-1);font-weight:600;min-width:48px;text-align:right;font-size:12px}
+
+  .upd-stamp{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#F3F4F6;border-radius:14px;font-size:11px;color:var(--text-2)}
+  .upd-stamp::before{content:"";width:6px;height:6px;background:var(--success);border-radius:50%}
+
+  /* Pinned dashboard inside 點數管理 */
+  .pinned{background:#fff;border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
+  .pinned-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .pinned-head h3{margin:0;font-size:15px;font-weight:600}
+
+  /* Settings cards */
+  .set-card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+  .set-card-head{padding:14px 20px;border-bottom:1px solid var(--border);background:#FAFBFC;display:flex;justify-content:space-between;align-items:center}
+  .set-card-head h3{margin:0;font-size:14px;font-weight:600}
+  .set-card-body{padding:18px 20px}
+  .set-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px dashed #F0F0F0;gap:12px}
+  .set-row:last-child{border-bottom:none}
+  .set-key{font-size:13px;color:var(--text-2);min-width:160px}
+  .set-val{font-size:13px;color:var(--text-1);flex:1;text-align:right}
+  .set-val strong{font-weight:600}
+  .set-info{padding:14px 16px;background:#F0F7FF;border:1px dashed #BFDBFE;border-radius:6px;font-size:13px;color:var(--text-2);margin-bottom:14px;line-height:1.6}
+
+  /* Detail modal sections */
+  .detail-section{margin-bottom:18px}
+  .detail-section h4{font-size:13px;color:var(--text-2);margin:0 0 8px;font-weight:600;text-transform:none;border-left:3px solid var(--primary);padding-left:8px}
+  .detail-row{display:flex;padding:6px 0;font-size:13px;gap:12px}
+  .detail-row .k{min-width:120px;color:var(--text-2)}
+  .detail-row .v{flex:1;color:var(--text-1)}
+
+  /* ===== 新增/編輯活動 Modal 並排表單 ===== */
+  .form-h{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px}
+  .form-h > label{flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px;margin-bottom:0;display:flex;align-items:center;gap:4px}
+  .form-h-input{flex:1;min-width:0}
+  .inline-suffix{display:inline-flex;align-items:center;gap:6px}
+  .hint-inline{font-size:11px;color:var(--text-3);margin-left:6px}
+
+  /* Popover（點擊或 hover 顯示，內容可換行） */
+  .pop-wrap{position:relative;display:inline-flex;align-items:center;cursor:help}
+  .pop-wrap .pop-ic{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#E5E7EB;color:#6B7280;font-size:10px;font-weight:700}
+  .pop-wrap:hover .pop-box,.pop-wrap.show .pop-box{opacity:1;visibility:visible}
+  .pop-box{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1F2937;color:#fff;padding:10px 14px;font-size:12px;font-weight:400;border-radius:8px;width:300px;opacity:0;visibility:hidden;transition:opacity .15s;z-index:500;pointer-events:none;line-height:1.65;text-align:left;white-space:normal}
+  .pop-box::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1F2937}
+  .pop-box.down{bottom:auto;top:calc(100% + 8px)}
+  .pop-box.down::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#1F2937}
+  .pop-box .lbl{display:block;font-weight:600;margin-top:6px;color:#FCD34D}
+  .pop-box .lbl:first-child{margin-top:0}
+
+  /* 警示勾選同意 */
+  .agree-box{margin-top:18px;padding:14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px}
+  .agree-box label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+  .agree-box input[type="checkbox"]{margin-top:3px;flex-shrink:0}
+  .agree-box .agree-text{font-size:13px;color:#92400E;line-height:1.65}
+
+  /* 拖曳排序 handle + 序號 input */
+  .drag-handle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:24px;color:var(--text-3);cursor:grab;user-select:none;font-size:14px;line-height:1}
+  .drag-handle:hover{color:var(--text-1)}
+  tr.dragging{opacity:.4}
+  tr.drag-over td{border-top:2px solid var(--primary)}
+  .order-input{width:48px;padding:4px 6px;text-align:center;font-size:12px;border:1px solid var(--border);border-radius:4px;background:#fff}
+  .order-cell{display:flex;align-items:center;gap:6px}
+
+  /* SVG 折線圖 */
+  .linechart{width:100%;height:240px}
+  .linechart .grid{stroke:#F3F4F6;stroke-width:1}
+  .linechart .axis-label{fill:var(--text-3);font-size:10px}
+  .linechart .line-a{fill:none;stroke:#1875F0;stroke-width:2.5}
+  .linechart .line-b{fill:none;stroke:#16A34A;stroke-width:2.5}
+  .linechart .dot-a{fill:#1875F0}
+  .linechart .dot-b{fill:#16A34A}
+  .linechart .area-a{fill:#1875F0;opacity:.08}
+
+  /* 儲值與設定 — 頂部資訊卡 */
+  .topup-card{background:linear-gradient(135deg,#1875F0,#7E5EE5);color:#fff;border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:20px;align-items:center;margin-bottom:20px}
+  .topup-stat .lbl{font-size:12px;opacity:.85;margin-bottom:4px}
+  .topup-stat .val{font-size:22px;font-weight:700;line-height:1.2}
+  .topup-stat .sub{font-size:11px;opacity:.8;margin-top:2px}
+  .topup-card .vline{width:1px;height:48px;background:rgba(255,255,255,.25)}
+  .btn-onwhite{background:#fff;color:var(--primary);border-color:#fff;font-weight:600}
+  .btn-onwhite:hover{background:#F0F7FF;color:var(--primary)}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">S</span>
+      <span>SHOPLINE</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">商店管理</div>
+      <div class="nav-item nav-disabled">📊 商店概覽</div>
+      <div class="nav-item nav-disabled">📦 商品管理</div>
+      <div class="nav-item nav-disabled">🛒 訂單管理</div>
+      <div class="nav-item nav-disabled">👥 會員管理</div>
+      <div class="nav-item nav-disabled">📈 數據分析</div>
+
+      <div class="nav-section">行銷與工具</div>
+      <div class="nav-item nav-disabled">🎯 優惠及促銷</div>
+      <div class="nav-item nav-disabled">📨 行銷通知</div>
+
+      <div class="nav-section">應用程式</div>
+      <div class="nav-group">
+        <div class="nav-group-head">
+          <span>💎</span>
+          <span>點數回饋</span>
+          <span class="pill-app">12CM</span>
+        </div>
+        <div class="nav-sub">
+          <div class="nav-item active" data-view="dashboard">回饋總覽</div>
+          <div class="nav-item" data-view="campaigns">回饋活動</div>
+          <div class="nav-item" data-view="points">點數管理</div>
+        </div>
+      </div>
+      <div class="nav-item nav-disabled">🧩 其他應用</div>
+
+      <div class="nav-section">系統設定</div>
+      <div class="nav-item nav-disabled">⚙️ 商店設定</div>
+    </nav>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <div class="main-wrap">
+
+    <div class="topbar">
+      <div class="breadcrumb" id="breadcrumb">
+        <span>應用程式</span>
+        <span class="sep">/</span>
+        <span>點數回饋</span>
+        <span class="sep">/</span>
+        <span class="here" id="bc-here">回饋總覽</span>
+      </div>
+      <div class="topbar-right">
+        <span class="shop-label">商店：<strong>艾瑪絲示範店</strong></span>
+        <span class="bell">🔔</span>
+        <span class="avatar">R</span>
+      </div>
+    </div>
+
+    <div class="embed-banner">
+      <div class="left">
+        <span class="dot"></span>
+        <span>您正在使用 <strong>12CM 點數回饋</strong> 應用程式｜版本 v1.0.0</span>
+      </div>
+      <a href="#" class="muted" style="font-size:12px">說明文件 ↗</a>
+    </div>
+
+    <div class="content">
+
+      <!-- ============== VIEW: 回饋總覽（訂單角度，仿 Shoplytics 折扣訂單分析） ============== -->
+      <div class="view active" id="view-dashboard">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">回饋總覽</h1>
+            <p class="page-desc">以訂單角度分析使用回饋活動的成效，包含成交訂單量、使用回饋訂單比例與客單價對比。</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span class="upd-stamp" id="upd-stamp-1"></span>
+            <span class="date-pill">📅 2026/04/20 - 2026/05/19 ▾</span>
+            <button class="btn">匯出</button>
+          </div>
+        </div>
+
+        <!-- 回饋活動訂單分析 -->
+        <div class="card" style="margin-bottom:20px">
+          <h3 style="margin:0 0 16px;font-size:15px;font-weight:600">回饋活動訂單分析</h3>
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px">
+            <div>
+              <div style="margin-bottom:18px">
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">● 成交訂單量</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font-size:24px;font-weight:700">1,247</span>
+                  <span class="delta" style="font-size:12px;color:var(--success)">↑ 12.4%</span>
+                </div>
+                <div class="muted" style="font-size:11px">同期：1,108 筆</div>
+              </div>
+              <div style="margin-bottom:18px">
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">● 使用回饋活動訂單</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font-size:24px;font-weight:700">384</span>
+                  <span class="delta" style="font-size:12px;color:var(--success)">↑ 18.2%</span>
+                </div>
+                <div class="muted" style="font-size:11px">佔比 30.8%（同期 29.3%）</div>
+              </div>
+              <div style="margin-bottom:18px">
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">● 使用回饋訂單營業額</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font-size:24px;font-weight:700">NT$ 612,480</span>
+                </div>
+                <div class="muted" style="font-size:11px">佔總營業額 38.5%</div>
+              </div>
+              <div>
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">● 平均客單價</div>
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font-size:18px;font-weight:600;color:var(--primary)">NT$ 1,595</span>
+                  <span class="muted" style="font-size:12px">使用回饋</span>
+                  <span style="color:var(--text-3)">/</span>
+                  <span style="font-size:18px;font-weight:600;color:var(--text-2)">NT$ 1,140</span>
+                  <span class="muted" style="font-size:12px">未使用</span>
+                </div>
+                <div class="muted" style="font-size:11px">使用回饋之客單高 +39.9%</div>
+              </div>
+            </div>
+            <div>
+              <svg class="linechart" id="chart-order" viewBox="0 0 600 240" preserveAspectRatio="none"></svg>
+              <div class="chart-x" id="chart-order-x" style="padding-top:6px"></div>
+              <div style="display:flex;gap:18px;font-size:11px;color:var(--text-2);margin-top:10px;justify-content:center">
+                <span><span style="display:inline-block;width:14px;height:3px;background:#1875F0;margin-right:4px;vertical-align:middle"></span>使用回饋訂單</span>
+                <span><span style="display:inline-block;width:14px;height:3px;background:#16A34A;margin-right:4px;vertical-align:middle"></span>未使用回饋訂單</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI 小卡 -->
+        <div class="card-row">
+          <div class="card metric">
+            <div class="label">使用回饋訂單佔比</div>
+            <div class="value">30.8%</div>
+            <div class="delta">↑ 1.5%</div>
+          </div>
+          <div class="card metric">
+            <div class="label">使用回饋訂單客單價</div>
+            <div class="value">NT$ 1,595</div>
+            <div class="delta">↑ 39.9% vs 未使用</div>
+          </div>
+          <div class="card metric">
+            <div class="label">回饋會員回購率</div>
+            <div class="value">42.3%</div>
+            <div class="sub">本期內 ≥ 2 次購買</div>
+          </div>
+          <div class="card metric">
+            <div class="label">活動 ROI</div>
+            <div class="value">4.5x</div>
+            <div class="sub">營業額 / 點數成本</div>
+          </div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="breakdown-grid">
+          <div class="bd-card">
+            <h4>各回饋活動訂單數</h4>
+            <div class="bd-row"><span class="bd-name">3C 加碼回饋</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:78%"></span></span><span class="bd-val">142</span></span></div>
+            <div class="bd-row"><span class="bd-name">聖誕禮品季 - 全站底</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:55%"></span></span><span class="bd-val">100</span></span></div>
+            <div class="bd-row"><span class="bd-name">熱銷洗髮系列</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:42%"></span></span><span class="bd-val">76</span></span></div>
+            <div class="bd-row"><span class="bd-name">夏日折扣加碼</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:31%"></span></span><span class="bd-val">42</span></span></div>
+            <div class="bd-row"><span class="bd-name">會員回饋日</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:13%"></span></span><span class="bd-val">24</span></span></div>
+          </div>
+          <div class="bd-card">
+            <h4>各回饋活動營業額</h4>
+            <div class="bd-row"><span class="bd-name">3C 加碼回饋</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:85%;background:#16A34A"></span></span><span class="bd-val">NT$ 245k</span></span></div>
+            <div class="bd-row"><span class="bd-name">聖誕禮品季 - 全站底</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:62%;background:#16A34A"></span></span><span class="bd-val">NT$ 178k</span></span></div>
+            <div class="bd-row"><span class="bd-name">熱銷洗髮系列</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:35%;background:#16A34A"></span></span><span class="bd-val">NT$ 102k</span></span></div>
+            <div class="bd-row"><span class="bd-name">夏日折扣加碼</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:21%;background:#16A34A"></span></span><span class="bd-val">NT$ 62k</span></span></div>
+            <div class="bd-row"><span class="bd-name">會員回饋日</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:9%;background:#16A34A"></span></span><span class="bd-val">NT$ 25k</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== VIEW: 回饋活動 ============== -->
+      <div class="view" id="view-campaigns">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">回饋活動</h1>
+            <p class="page-desc">設定點數回饋活動。系統將於符合鑑賞期條件的訂單（訂單完成日 / order/fully-fulfilled）每日 00:00 排程自動發放點數。</p>
+          </div>
+          <button class="btn primary" onclick="openNewCampaign()">+ 新增回饋活動</button>
+        </div>
+
+        <div class="card table-card">
+          <div class="filter-bar">
+            <div class="filter-inline">
+              <label>狀態</label>
+              <select class="select"><option>全部</option><option>進行中</option><option>已排程</option><option>已結束</option><option>已停用</option></select>
+            </div>
+            <div class="filter-inline">
+              <label>回饋條件</label>
+              <select class="select"><option>全部</option><option>全站</option><option>指定分類</option><option>指定品項</option></select>
+            </div>
+            <div class="filter-inline">
+              <label>關鍵字</label>
+              <input class="input" placeholder="搜尋活動名稱"/>
+            </div>
+            <div class="actions">
+              <button class="btn">套用</button>
+              <button class="btn ghost">清除</button>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">
+                  <span style="display:inline-flex;align-items:center;gap:4px">
+                    排序
+                    <span class="pop-wrap"><span class="pop-ic">?</span>
+                      <span class="pop-box down">
+                        <span class="lbl">活動衝突優先序</span>
+                        當同一品項被多條進行中活動涵蓋時，系統將依此排序判斷適用順序，數字越小者優先發放。<br>
+                        <span class="lbl">調整方式</span>
+                        ① 拖曳左側「⋮⋮」手把調整位置　② 或直接於序號欄位輸入數字後 Enter 套用。
+                      </span>
+                    </span>
+                  </span>
+                </th>
+                <th class="sortable" onclick="sortCampaigns('name')">活動名稱 <span class="sort-ic" id="cic-name">↕</span></th>
+                <th class="sortable" onclick="sortCampaigns('scope')">回饋條件 <span class="sort-ic" id="cic-scope">↕</span></th>
+                <th class="sortable" onclick="sortCampaigns('mode')">回饋方式 <span class="sort-ic" id="cic-mode">↕</span></th>
+                <th class="sortable" style="min-width:200px" onclick="sortCampaigns('budget')">預算額度 <span class="sort-ic" id="cic-budget">↕</span></th>
+                <th class="sortable" onclick="sortCampaigns('start')">活動期間 <span class="sort-ic" id="cic-start">↕</span></th>
+                <th class="sortable" onclick="sortCampaigns('status')">狀態 <span class="sort-ic" id="cic-status">↕</span></th>
+                <th style="width:60px">啟用</th>
+                <th class="col-center" style="width:130px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-campaigns"></tbody>
+          </table>
+
+          <div class="pagi">
+            <div class="pagi-info" id="pagi-info"></div>
+            <div class="pagi-pages" id="pagi-pages"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== VIEW: 點數管理 ============== -->
+      <div class="view" id="view-points">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">點數管理</h1>
+            <p class="page-desc">查看 LINE POINTS 發放明細、點數分析與服務設定。</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span class="upd-stamp" id="upd-stamp-2"></span>
+            <span class="date-pill">📅 2026/04/20 - 2026/05/19 ▾</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <div class="tab active" data-tab="ledger">發放明細</div>
+          <div class="tab" data-tab="analysis">點數分析</div>
+          <div class="tab" data-tab="settings">餘額與設定</div>
+        </div>
+
+        <!-- Tab: 發放明細 -->
+        <div class="tab-pane" id="tab-ledger">
+          <div class="card table-card">
+            <div class="filter-bar">
+              <div class="filter-inline">
+                <label>日期</label>
+                <input class="input" type="date" value="2026-05-01"/>
+                <span style="color:var(--text-3)">~</span>
+                <input class="input" type="date" value="2026-05-31"/>
+              </div>
+              <div class="filter-inline">
+                <label>狀態</label>
+                <select class="select" id="f-status"><option>全部</option><option>未領取</option><option>已領取</option><option>已過期</option></select>
+              </div>
+              <div class="filter-inline">
+                <label>回饋活動</label>
+                <select class="select" id="f-camp"><option>全部</option><option>聖誕禮品季 - 全站底</option><option>3C 加碼回饋</option><option>熱銷洗髮系列</option></select>
+              </div>
+              <div class="filter-inline">
+                <label>訂單編號</label>
+                <input class="input" placeholder="輸入訂單編號"/>
+              </div>
+              <div class="actions">
+                <button class="btn primary">套用</button>
+                <button class="btn ghost" onclick="clearLedgerFilter()">清除篩選</button>
+                <button class="btn">匯出 CSV</button>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable" onclick="sortLedger('sentAt')">發送時間 <span class="sort-ic" id="ic-sentAt">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('orderId')">訂單編號 <span class="sort-ic" id="ic-orderId">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('member')">會員 <span class="sort-ic" id="ic-member">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('activity')">回饋活動 <span class="sort-ic" id="ic-activity">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('points')">點數 <span class="sort-ic" id="ic-points">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('status')">狀態 <span class="sort-ic" id="ic-status">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('claimedAt')">領取時間 <span class="sort-ic" id="ic-claimedAt">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('expiresAt')">到期時間 <span class="sort-ic" id="ic-expiresAt">↕</span></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-ledger"></tbody>
+            </table>
+            <div class="pagi">
+              <div class="pagi-info">共 <span id="ledger-count">0</span> 筆</div>
+              <div class="pagi-pages">
+                <button class="pagi-btn" disabled>‹</button>
+                <button class="pagi-btn active">1</button>
+                <button class="pagi-btn" disabled>›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: 點數分析（點數視角 dashboard） -->
+        <div class="tab-pane" id="tab-analysis" style="display:none">
+
+          <!-- 點數發放分析（仿附圖：左 4 stats + 右月度柱狀圖，當月有色其餘淺灰） -->
+          <div class="card" style="margin-bottom:20px">
+            <h3 style="margin:0 0 16px;font-size:15px;font-weight:600">點數發放分析</h3>
+            <div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
+              <div>
+                <div style="margin-bottom:16px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+                    <span style="font-size:13px;color:var(--text-1)">● 已發放點數</span>
+                    <span style="font-size:18px;font-weight:700">12,850</span>
+                  </div>
+                  <div style="height:4px;background:#E8F1FE;border-radius:2px"><div style="height:100%;width:90%;background:#1875F0;border-radius:2px"></div></div>
+                </div>
+                <div style="margin-bottom:16px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+                    <span style="font-size:13px;color:var(--text-1)">● 已領取點數</span>
+                    <span style="font-size:18px;font-weight:700">9,310</span>
+                  </div>
+                  <div style="height:4px;background:#DCFCE7;border-radius:2px"><div style="height:100%;width:65%;background:#16A34A;border-radius:2px"></div></div>
+                </div>
+                <div style="margin-bottom:16px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+                    <span style="font-size:13px;color:var(--text-1)">● 未領取點數</span>
+                    <span style="font-size:18px;font-weight:700">3,540</span>
+                  </div>
+                  <div style="height:4px;background:#FEF3C7;border-radius:2px"><div style="height:100%;width:25%;background:#F59E0B;border-radius:2px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+                    <span style="font-size:13px;color:var(--text-1)">● 已過期點數</span>
+                    <span style="font-size:18px;font-weight:700">0</span>
+                  </div>
+                  <div style="height:4px;background:#FEE2E2;border-radius:2px"><div style="height:100%;width:0%;background:#DC2626;border-radius:2px"></div></div>
+                </div>
+              </div>
+              <div>
+                <div class="chart-area" id="chart-points" style="height:240px"></div>
+                <div class="chart-x" id="chart-points-x"></div>
+                <div style="display:flex;gap:14px;font-size:11px;color:var(--text-2);margin-top:10px;justify-content:flex-end">
+                  <span><span style="display:inline-block;width:10px;height:10px;background:#1875F0;border-radius:2px;margin-right:4px;vertical-align:middle"></span>當月</span>
+                  <span><span style="display:inline-block;width:10px;height:10px;background:#E5E7EB;border-radius:2px;margin-right:4px;vertical-align:middle"></span>歷史</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI 小卡 -->
+          <div class="card-row">
+            <div class="card metric">
+              <div class="label">點數領取率</div>
+              <div class="value">72.4%</div>
+              <div class="delta">↑ 3.1% vs 上期</div>
+            </div>
+            <div class="card metric">
+              <div class="label">符合資格訂單數</div>
+              <div class="value">384</div>
+              <div class="delta">↑ 18.2%</div>
+            </div>
+            <div class="card metric">
+              <div class="label">平均回饋率</div>
+              <div class="value">2.8%</div>
+              <div class="sub">於符合資格訂單</div>
+            </div>
+            <div class="card metric">
+              <div class="label">進行中活動數</div>
+              <div class="value">4</div>
+              <div class="sub">總共建立 7 條</div>
+            </div>
+          </div>
+
+          <!-- Breakdown grids -->
+          <div class="breakdown-grid">
+            <div class="bd-card">
+              <h4>活動發放點數分佈</h4>
+              <div class="bd-row"><span class="bd-name">3C 加碼回饋</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:73%"></span></span><span class="bd-val">5,420</span></span></div>
+              <div class="bd-row"><span class="bd-name">聖誕禮品季 - 全站底</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:48%"></span></span><span class="bd-val">3,580</span></span></div>
+              <div class="bd-row"><span class="bd-name">熱銷洗髮系列</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:25%"></span></span><span class="bd-val">1,860</span></span></div>
+              <div class="bd-row"><span class="bd-name">春節短期加碼</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:26%"></span></span><span class="bd-val">1,990</span></span></div>
+            </div>
+            <div class="bd-card">
+              <h4>活動領取率</h4>
+              <div class="bd-row"><span class="bd-name">3C 加碼回饋</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:85%;background:#16A34A"></span></span><span class="bd-val">85%</span></span></div>
+              <div class="bd-row"><span class="bd-name">熱銷洗髮系列</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:78%;background:#16A34A"></span></span><span class="bd-val">78%</span></span></div>
+              <div class="bd-row"><span class="bd-name">聖誕禮品季 - 全站底</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:62%;background:#F59E0B"></span></span><span class="bd-val">62%</span></span></div>
+              <div class="bd-row"><span class="bd-name">春節短期加碼</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:55%;background:#F59E0B"></span></span><span class="bd-val">55%</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: 儲值與設定 -->
+        <div class="tab-pane" id="tab-settings" style="display:none">
+
+          <!-- 頂部資訊卡：目前可用點數 / 本月預支點數 / 本月已發放 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;align-items:stretch">
+            <!-- 目前可用點數（含操作按鈕） -->
+            <div class="card" style="padding:18px 20px;border-color:var(--primary);background:#F0F7FF">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">目前可用點數</div>
+              <div style="font-size:28px;font-weight:700;color:var(--primary);line-height:1.2">38,560</div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;margin-bottom:14px">最近一次儲值：2026-05-12 | 10,000 點</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn primary sm" style="white-space:nowrap">＋ 申請儲值</button>
+                <button class="btn sm" style="white-space:nowrap">儲值紀錄</button>
+              </div>
+            </div>
+            <!-- 本月預支點數 -->
+            <div class="card" style="padding:18px 20px">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月預支點數</div>
+              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">0</div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px">點數餘額不足時自動預支</div>
+            </div>
+            <!-- 本月已發放 -->
+            <div class="card" style="padding:18px 20px">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月已發放</div>
+              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">12,850</div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px">月結預計：NT$12,850</div>
+            </div>
+          </div>
+
+          <!-- ① 預支結算 -->
+          <div class="set-card">
+            <div class="set-card-head">
+              <h3>預支結算</h3>
+            </div>
+            <div class="set-card-body">
+              <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 14px;padding-bottom:14px;border-bottom:1px dashed #F0F0F0">點數餘額不足時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，系統將自動預支點數完成發放，並於每月進行結算。</p>
+              <div class="set-row">
+                <div class="set-key">結算週期</div>
+                <div class="set-val">每月 1 日結算上月預支點數用量，付款期限為帳單寄出後 7 個工作日</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ② 通知偏好 -->
+          <div class="set-card">
+            <div class="set-card-head">
+              <h3>通知偏好</h3>
+              <button class="btn sm">儲存變更</button>
+            </div>
+            <div class="set-card-body">
+              <!-- 點數餘額 group -->
+              <div style="margin-bottom:12px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">點數餘額</div>
+                <div class="set-row">
+                  <div class="set-key">即將用罄通知</div>
+                  <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                    <label class="toggle" title="此通知為強制啟用，無法關閉"><input type="checkbox" checked disabled><span class="slider"></span></label>
+                    <span>啟用</span>
+                    <span style="font-size:11px;color:var(--text-3);background:#F3F4F6;padding:2px 7px;border-radius:10px">強制啟用</span>
+                  </div>
+                </div>
+                <div class="set-row">
+                  <div class="set-key">通知門檻</div>
+                  <div class="set-val" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                    已使用達 <input class="input" type="number" value="80" min="50" max="100" style="width:64px;padding:4px 8px;text-align:center"> % 時通知
+                  </div>
+                </div>
+              </div>
+              <!-- 活動預算 group -->
+              <div style="margin-bottom:12px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">活動預算</div>
+                <div class="set-row">
+                  <div class="set-key">即將用罄通知</div>
+                  <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                    <label class="toggle"><input type="checkbox" checked id="notif-activity-toggle" onchange="document.getElementById('notif-activity-threshold').style.opacity=this.checked?'1':'0.4'"><span class="slider"></span></label>
+                    <span id="notif-activity-label">啟用</span>
+                  </div>
+                </div>
+                <div class="set-row" id="notif-activity-threshold">
+                  <div class="set-key">通知門檻</div>
+                  <div class="set-val" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                    已使用達 <input class="input" type="number" value="90" min="50" max="100" style="width:64px;padding:4px 8px;text-align:center"> % 時通知
+                  </div>
+                </div>
+              </div>
+              <!-- 通知信箱 -->
+              <div class="set-row">
+                <div class="set-key">通知信箱</div>
+                <div class="set-val" style="text-align:left">
+                  <input class="input" type="email" placeholder="例：marketing@yourstore.com" value="marketing@yourstore.com" style="width:100%"/>
+                  <div class="hint" style="margin-top:6px">行銷與財務收件可能不同，請填寫專用接收信箱。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ③ LINE OA 整合 -->
+          <div class="set-card">
+            <div class="set-card-head">
+              <h3>LINE OA 整合</h3>
+              <button class="btn sm" onclick="saveLineOA()">儲存變更</button>
+            </div>
+            <div class="set-card-body">
+              <div class="set-row">
+                <div class="set-key">啟用 LINE OA 傳點</div>
+                <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                  <label class="toggle"><input type="checkbox" id="lineoa-toggle" onchange="onLineOAToggle(this)"><span class="slider"></span></label>
+                  <span id="lineoa-status-label">關閉</span>
+                </div>
+              </div>
+              <!-- Token 欄位（啟用才顯示） -->
+              <div class="set-row" id="lineoa-token-row" style="display:none">
+                <div class="set-key">LINE Channel<br>Access Token</div>
+                <div class="set-val" style="text-align:left">
+                  <input class="input" type="password" id="lineoa-token-input" placeholder="貼上 LINE Messaging API Channel Access Token" style="width:100%;font-family:monospace"/>
+                  <div class="hint" style="margin-top:6px">取得方式：<a href="#" style="color:var(--primary)">LINE Developers Console ↗</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LINE OA 同意 Popover Modal -->
+          <div class="modal-back layer-2" id="modal-lineoa-agree">
+            <div class="modal sm">
+              <div class="modal-head">
+                <h3 class="t">啟用 LINE OA 整合</h3>
+                <button class="modal-close" onclick="cancelLineOA()">×</button>
+              </div>
+              <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-1);margin:0 0 12px">啟用後，系統將透過您的 LINE OA 傳送點數連結給消費者。</p>
+                <div class="info-line" style="margin-bottom:0">
+                  ⚠️ 若 LINE OA 訊息發送量超過 LINE 免費額度，將產生<strong>訊息費用</strong>，該費用由 LINE 直接向您收取，與本服務無關，非本公司收取。
+                </div>
+              </div>
+              <div class="modal-foot">
+                <button class="btn" onclick="cancelLineOA()">取消</button>
+                <button class="btn primary" onclick="confirmLineOA()">確認同意</button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ④ 服務資訊 -->
+          <div class="set-card">
+            <div class="set-card-head">
+              <h3>服務資訊</h3>
+            </div>
+            <div class="set-card-body">
+              <div class="set-row">
+                <div class="set-key">公司名稱</div>
+                <div class="set-val">睿鼎數位股份有限公司</div>
+              </div>
+              <div class="set-row">
+                <div class="set-key">公司統編</div>
+                <div class="set-val">42837620</div>
+              </div>
+              <div class="set-row">
+                <div class="set-key">服務電話</div>
+                <div class="set-val">02-23960089</div>
+              </div>
+              <div class="set-row">
+                <div class="set-key">服務時間</div>
+                <div class="set-val">週一到週五 10:00 - 17:00</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL: 新增 / 編輯活動 ============== -->
+<div class="modal-back" id="modal-campaign">
+  <div class="modal lg">
+    <div class="modal-head">
+      <h3 class="t" id="campaign-modal-title">新增回饋活動</h3>
+      <button class="modal-close" onclick="closeModal('modal-campaign')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 活動名稱 -->
+      <div class="form-h">
+        <label>活動名稱 <span class="req">*</span></label>
+        <div class="form-h-input">
+          <input class="input" id="f-name" placeholder="例：聖誕禮品季 - 全站底"/>
+        </div>
+      </div>
+
+      <!-- 回饋條件 -->
+      <div class="form-h">
+        <label>回饋條件 <span class="req">*</span></label>
+        <div class="form-h-input">
+          <select class="select" id="f-scope" onchange="onScopeChange()" style="max-width:240px">
+            <option value="all">所有訂單</option>
+            <option value="orderprice">訂單滿額</option>
+            <option value="category">指定分類</option>
+            <option value="product">指定品項</option>
+          </select>
+          <div id="threshold-wrap" style="display:none;margin-top:10px;align-items:center;gap:6px">
+            <span style="font-size:13px;color:var(--text-2)">滿額門檻：</span>
+            <input class="input" type="number" placeholder="500" style="width:120px"/>
+            <span style="font-size:13px">元</span>
+            <span class="pop-wrap"><span class="pop-ic">?</span>
+              <span class="pop-box">「訂單總額」不扣除全站折扣。<br>例：訂單總額 500 元，全站折扣 9 折，結帳金額 450 元。以訂單總額 500 元判斷是否符合滿額門檻。</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 範圍 picker：分類 / 品項 -->
+      <div class="range-section" id="range-category">
+        <div class="field">
+          <label>已選分類</label>
+          <div class="chip-row" id="cat-chips">
+            <span class="chip">3C 用品 <span class="x" onclick="this.parentElement.remove()">×</span></span>
+            <span class="chip">禮品禮盒 <span class="x" onclick="this.parentElement.remove()">×</span></span>
+          </div>
+          <button class="btn sm" onclick="openModal('modal-cat-picker')" style="margin-top:6px">+ 加入分類</button>
+          <div class="hint">⚠ 若選擇全部分類將自動切換為「所有訂單」</div>
+        </div>
+      </div>
+      <div class="range-section" id="range-product">
+        <div class="field">
+          <label>已選商品</label>
+          <div class="chip-row" id="prd-chips">
+            <span class="chip">AROMASE 5α 洗髮精 200ml <span class="x" onclick="this.parentElement.remove()">×</span></span>
+          </div>
+          <button class="btn sm" onclick="openModal('modal-prd-picker')" style="margin-top:6px">+ 加入商品</button>
+          <div class="hint">⚠ 若選擇全部商品將自動切換為「所有訂單」</div>
+        </div>
+      </div>
+
+      <!-- 回饋方式 + 回饋數值 並排 -->
+      <div class="form-h">
+        <label>回饋方式 <span class="req">*</span></label>
+        <div class="form-h-input" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+          <div class="radio-group" style="padding:0;gap:14px">
+            <label class="check-row">
+              <input type="radio" name="rwd-mode" value="pct" checked onchange="onRwdModeChange()">
+              依比例
+              <span class="pop-wrap"><span class="pop-ic">?</span>
+                <span class="pop-box" id="rwd-tip-text"></span>
+              </span>
+            </label>
+            <label class="check-row">
+              <input type="radio" name="rwd-mode" value="fix" onchange="onRwdModeChange()">
+              固定數值
+            </label>
+          </div>
+          <!-- 回饋數值（動態） -->
+          <div id="rwd-pct-wrap" class="inline-suffix">
+            <input class="input" type="number" placeholder="3" step="0.1" min="0.1" max="100" style="width:90px"/>
+            <span>%</span>
+            <span class="hint-inline">建議 1–10%</span>
+          </div>
+          <div id="rwd-fix-wrap" class="inline-suffix" style="display:none">
+            <input class="input" type="number" placeholder="50" min="1" max="1000" style="width:90px"/>
+            <span>點</span>
+            <span class="hint-inline">單次發點上限 1,000 點</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 回饋預算 -->
+      <div class="form-h">
+        <label>回饋預算 <span class="req">*</span></label>
+        <div class="form-h-input">
+          <div class="inline-suffix">
+            <input class="input" type="number" placeholder="3000" style="width:160px"/>
+            <span>點</span>
+          </div>
+          <div class="hint" style="margin-top:6px">預算用罄後系統自動停止露出並通知，<a href="#" onclick="gotoSettingsFromModal();return false" style="color:var(--primary)">前往開啟即將用罄通知 ↗</a></div>
+        </div>
+      </div>
+
+      <!-- 起始時間 / 結束時間 對齊並排 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <label style="flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px;display:flex;align-items:center;gap:4px">起始時間 <span class="req">*</span></label>
+            <div style="flex:1;min-width:0">
+              <div class="radio-group" style="padding:0;margin-bottom:8px;height:30px">
+                <label class="check-row"><input type="radio" name="start-mode" value="now" checked onchange="onStartModeChange()"> 立即啟用</label>
+                <label class="check-row"><input type="radio" name="start-mode" value="schedule" onchange="onStartModeChange()"> 排程啟用</label>
+              </div>
+              <input class="input" type="datetime-local" id="f-start" value="2026-05-19T00:00" disabled/>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <label style="flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px;display:flex;align-items:center;gap:4px">結束時間 <span class="req">*</span></label>
+            <div style="flex:1;min-width:0">
+              <div style="height:30px;margin-bottom:8px"></div>
+              <input class="input" type="datetime-local" id="f-end" value="2026-06-30T23:59"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注意事項勾選同意 -->
+      <div class="agree-box">
+        <div style="font-size:13px;font-weight:600;color:#92400E;margin-bottom:10px">我同意為保障消費者權益：</div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:8px">
+          <input type="checkbox" id="f-agree-1" style="margin-top:3px;flex-shrink:0"/>
+          <span class="agree-text">回饋預算用罄時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，不受影響。</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="f-agree-2" style="margin-top:3px;flex-shrink:0"/>
+          <span class="agree-text">點數餘額不足時，前述符合回饋資格之訂單，系統將自動預支點數完成發放，並於每月進行結算。</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-campaign')">取消</button>
+      <button class="btn primary" onclick="onCampaignSave()">儲存活動</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL: 分類選擇器 ============== -->
+<div class="modal-back layer-2" id="modal-cat-picker">
+  <div class="modal lg" style="width:720px">
+    <div class="modal-head">
+      <h3 class="t">商品分類選單（自 SHOPLINE 商品分類帶入）</h3>
+      <button class="modal-close" onclick="closeModal('modal-cat-picker')">×</button>
+    </div>
+    <div class="picker-search">
+      🔍 <input placeholder="搜尋分類名稱"/>
+    </div>
+    <div class="picker-toolbar">
+      <span>已選擇：<span class="sel-count" id="cat-sel-count">2/8</span></span>
+      <span class="link">清除全部</span>
+      <span class="right">展開 ▾</span>
+    </div>
+    <div class="picker-panels">
+      <div class="picker-left" id="cat-left"></div>
+      <div class="picker-right" id="cat-right"></div>
+    </div>
+    <div class="modal-foot">
+      <a href="#" class="muted" style="margin-right:auto;color:var(--primary);font-size:12px">找不到選項？前往 SHOPLINE 商品分類管理 ↗</a>
+      <button class="btn" onclick="closeModal('modal-cat-picker')">取消</button>
+      <button class="btn primary" onclick="closeModal('modal-cat-picker')">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL: 商品選擇器 ============== -->
+<div class="modal-back layer-2" id="modal-prd-picker">
+  <div class="modal lg" style="width:720px">
+    <div class="modal-head">
+      <h3 class="t">商品選單（自 SHOPLINE 商品資料帶入）</h3>
+      <button class="modal-close" onclick="closeModal('modal-prd-picker')">×</button>
+    </div>
+    <div class="picker-search">
+      🔍 <input placeholder="搜尋商品名稱或 SKU"/>
+    </div>
+    <div class="picker-toolbar">
+      <span>已選擇：<span class="sel-count" id="prd-sel-count">1/24</span></span>
+      <span class="link">清除全部</span>
+      <span class="right" style="font-size:12px">先選分類，再勾選該分類下的商品</span>
+    </div>
+    <div class="picker-panels">
+      <div class="picker-left" id="prd-left"></div>
+      <div class="picker-right" id="prd-right"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-prd-picker')">取消</button>
+      <button class="btn primary" onclick="closeModal('modal-prd-picker')">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL: 通用確認 ============== -->
+<div class="modal-back layer-2" id="modal-confirm">
+  <div class="modal sm">
+    <div class="modal-head">
+      <h3 class="t" id="confirm-title">提醒</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-body" style="margin:0 0 8px;font-size:14px;color:var(--text-1)"></p>
+      <p id="confirm-sub" style="margin:0;font-size:12px;color:var(--text-3)"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="confirmCancel()">取消</button>
+      <button class="btn primary" id="confirm-ok-btn" onclick="confirmOk()">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODAL: 訂單詳情 ============== -->
+<div class="modal-back layer-2" id="modal-order-detail">
+  <div class="modal xl">
+    <div class="modal-head">
+      <h3 class="t" id="od-title">訂單詳情 ─ #SL2026051800123</h3>
+      <button class="modal-close" onclick="closeModal('modal-order-detail')">×</button>
+    </div>
+    <div class="modal-body" id="od-body"></div>
+    <div class="modal-foot">
+      <a href="#" style="margin-right:auto;color:var(--primary);font-size:12px">於 SHOPLINE 訂單管理開啟 ↗</a>
+      <button class="btn" onclick="closeModal('modal-order-detail')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ===== LINE OA Toggle ===== */
+  function onLineOAToggle(input){
+    if(input.checked){
+      input.checked = false; // 先取消，等確認後再啟用
+      openModal('modal-lineoa-agree');
+    } else {
+      document.getElementById('lineoa-status-label').textContent = '關閉';
+      document.getElementById('lineoa-token-row').style.display = 'none';
+    }
+  }
+  function cancelLineOA(){
+    document.getElementById('lineoa-toggle').checked = false;
+    closeModal('modal-lineoa-agree');
+  }
+  function confirmLineOA(){
+    document.getElementById('lineoa-toggle').checked = true;
+    document.getElementById('lineoa-status-label').textContent = '啟用';
+    document.getElementById('lineoa-token-row').style.display = 'flex';
+    closeModal('modal-lineoa-agree');
+  }
+  function saveLineOA(){
+    alert('LINE OA 整合設定已儲存。');
+  }
+  /* 活動預算通知 toggle label */
+  document.addEventListener('DOMContentLoaded', function(){
+    const tog = document.getElementById('notif-activity-toggle');
+    if(tog) tog.addEventListener('change', function(){ document.getElementById('notif-activity-label').textContent = this.checked ? '啟用' : '關閉'; });
+  });
+
+  /* ===== Date format helper: YYYY/MM/DD HH:MM AM/PM (12hr) ===== */
+  function fmtDT(dStr){
+    if(!dStr) return '';
+    const d=(dStr instanceof Date)? dStr : new Date(dStr);
+    const yyyy=d.getFullYear();
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    let hh=d.getHours();
+    const ampm = hh<12 ? 'AM' : 'PM';
+    hh = hh%12; if(hh===0) hh=12;
+    const hh2=String(hh).padStart(2,'0');
+    const mi=String(d.getMinutes()).padStart(2,'0');
+    return `${yyyy}/${mm}/${dd} ${hh2}:${mi} ${ampm}`;
+  }
+  /* Updated stamp (current time) */
+  document.querySelectorAll('[id^="upd-stamp"]').forEach(el=>el.textContent = '資料截至 ' + fmtDT(new Date()));
+
+  /* ===== Nav ===== */
+  const navMap = {dashboard:'回饋總覽', campaigns:'回饋活動', points:'點數管理'};
+  function navTo(key){
+    document.querySelectorAll('.nav-sub .nav-item').forEach(el=>el.classList.toggle('active', el.dataset.view===key));
+    document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active', el.id==='view-'+key));
+    document.getElementById('bc-here').textContent = navMap[key] || '';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('.nav-sub .nav-item').forEach(el=>el.addEventListener('click',()=>navTo(el.dataset.view)));
+
+  /* ===== Modal ===== */
+  function openModal(id){ document.getElementById(id).classList.add('show'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+  document.querySelectorAll('.modal-back').forEach(m=>{
+    m.addEventListener('click', e=>{ if(e.target===m && !m.classList.contains('layer-2')) closeModal(m.id); });
+  });
+
+  /* Confirm */
+  let confirmCB = null;
+  function showConfirm({title, body, sub, okText='確認', danger=false, onOk}){
+    document.getElementById('confirm-title').textContent = title || '提醒';
+    document.getElementById('confirm-body').textContent = body || '';
+    document.getElementById('confirm-sub').textContent = sub || '';
+    const btn = document.getElementById('confirm-ok-btn');
+    btn.textContent = okText;
+    btn.classList.toggle('danger', danger);
+    confirmCB = onOk || null;
+    openModal('modal-confirm');
+  }
+  function confirmOk(){ closeModal('modal-confirm'); if(confirmCB) confirmCB(); confirmCB=null; }
+  function confirmCancel(){ closeModal('modal-confirm'); confirmCB=null; }
+
+  /* ===== Campaign Mock ===== */
+  const campaigns = [
+    {id:1, name:'聖誕禮品季 - 全站底', scope:'全站', mode:'1% 比例', budget:5000, usedEst:1840, status:'進行中', sBadge:'green', start:'2026-05-01T00:00', end:'2026-06-30T23:59', enabled:true, locked:true},
+    {id:2, name:'3C 加碼回饋', scope:'指定分類', scopeNote:'3C 用品', mode:'4% 比例', budget:3000, usedEst:2820, status:'進行中', sBadge:'green', start:'2026-05-10T00:00', end:'2026-05-31T23:59', enabled:true, locked:true},
+    {id:3, name:'熱銷洗髮系列', scope:'指定品項', scopeNote:'12 件商品', mode:'3% 比例', budget:2000, usedEst:645, status:'進行中', sBadge:'green', start:'2026-04-15T00:00', end:'2026-07-15T23:59', enabled:true, locked:true},
+    {id:4, name:'新年福袋專案', scope:'指定品項', scopeNote:'3 件商品', mode:'5% 比例', budget:1500, usedEst:0, status:'已排程', sBadge:'blue', start:'2026-06-01T00:00', end:'2026-06-15T23:59', enabled:true, locked:false},
+    {id:5, name:'春節短期加碼', scope:'全站', mode:'2% 比例', budget:3000, usedEst:3000, status:'已結束', sBadge:'gray', start:'2026-02-01T00:00', end:'2026-02-28T23:59', enabled:false, locked:false},
+    {id:6, name:'5月母親節加碼', scope:'指定分類', scopeNote:'美妝保養', mode:'4% 比例', budget:4000, usedEst:3850, status:'已結束', sBadge:'gray', start:'2026-05-01T00:00', end:'2026-05-12T23:59', enabled:false, locked:false},
+    {id:7, name:'內部測試 - 已停用', scope:'全站', mode:'1% 比例', budget:1000, usedEst:120, status:'已停用', sBadge:'red', start:'2026-04-01T00:00', end:'2026-12-31T23:59', enabled:false, locked:false},
+    {id:8, name:'會員回饋日', scope:'全站', mode:'固定 50 點', budget:5000, usedEst:1200, status:'進行中', sBadge:'green', start:'2026-05-15T00:00', end:'2026-06-30T23:59', enabled:true, locked:true},
+    {id:9, name:'618 預熱活動', scope:'指定分類', scopeNote:'3C 用品', mode:'3% 比例', budget:6000, usedEst:0, status:'已排程', sBadge:'blue', start:'2026-06-10T00:00', end:'2026-06-20T23:59', enabled:true, locked:false},
+    {id:10, name:'夏日折扣加碼', scope:'指定品項', scopeNote:'18 件商品', mode:'2.5% 比例', budget:2500, usedEst:580, status:'進行中', sBadge:'green', start:'2026-05-12T00:00', end:'2026-07-12T23:59', enabled:true, locked:true},
+    {id:11, name:'清倉特賣回饋', scope:'指定分類', scopeNote:'清倉專區', mode:'1% 比例', budget:800, usedEst:240, status:'進行中', sBadge:'green', start:'2026-05-10T00:00', end:'2026-06-10T23:59', enabled:true, locked:true},
+    {id:12, name:'年中慶超值禮', scope:'全站', mode:'固定 30 點', budget:8000, usedEst:0, status:'已排程', sBadge:'blue', start:'2026-06-15T00:00', end:'2026-07-15T23:59', enabled:true, locked:false},
+  ];
+  // 初始化「序號」（依目前陣列順序）
+  campaigns.forEach((c,i)=>c.order = i+1);
+
+  let currentPage = 1; const PAGE_SIZE = 10;
+  let cSortKey = null, cSortDir = 'asc';
+  function sortCampaigns(key){
+    if(cSortKey===key){ cSortDir = (cSortDir==='asc')?'desc':'asc'; }
+    else{ cSortKey=key; cSortDir='asc'; }
+    renderCampaigns();
+  }
+  function getSortedCampaigns(){
+    if(!cSortKey) return [...campaigns].sort((a,b)=>a.order-b.order);
+    const arr = [...campaigns];
+    arr.sort((a,b)=>{
+      let va=a[cSortKey], vb=b[cSortKey];
+      if(cSortKey==='start') return (new Date(va)-new Date(vb))*(cSortDir==='asc'?1:-1);
+      if(typeof va==='number') return (va-vb)*(cSortDir==='asc'?1:-1);
+      return String(va).localeCompare(String(vb),'zh-Hant')*(cSortDir==='asc'?1:-1);
+    });
+    return arr;
+  }
+  function renderCampaigns(){
+    const sorted = getSortedCampaigns();
+    const total = sorted.length;
+    const start = (currentPage-1)*PAGE_SIZE;
+    const end = Math.min(start+PAGE_SIZE, total);
+    const rows = sorted.slice(start,end).map(c=>{
+      const pct = Math.round(c.usedEst/c.budget*100);
+      const fillCls = pct>=90 ? 'danger' : (pct>=70 ? 'warn' : '');
+      const scopeText = c.scopeNote ? `${c.scope}<div class="muted">${c.scopeNote}</div>` : c.scope;
+      const delBtn = c.locked
+        ? `<button class="btn sm ghost danger" disabled title="進行中之活動不得刪除">刪除</button>`
+        : `<button class="btn sm ghost danger" onclick="askDelete(${c.id},'${c.name.replace(/'/g,"\\'")}',${c.locked})">刪除</button>`;
+      return `
+        <tr draggable="true" data-id="${c.id}"
+            ondragstart="onDragStart(event,${c.id})"
+            ondragover="onDragOver(event)"
+            ondragleave="onDragLeave(event)"
+            ondrop="onDrop(event,${c.id})"
+            ondragend="onDragEnd(event)">
+          <td>
+            <div class="order-cell">
+              <span class="drag-handle" title="拖曳調整排序">⋮⋮</span>
+              <input class="order-input" type="number" min="1" value="${c.order}"
+                onchange="onOrderInput(${c.id}, this.value)"
+                onclick="event.stopPropagation()"
+                ondragstart="event.preventDefault();event.stopPropagation()"/>
+            </div>
+          </td>
+          <td class="cell-strong">${c.name}</td>
+          <td>${scopeText}</td>
+          <td>${c.mode}</td>
+          <td>
+            <div class="pgr">
+              <div class="pgr-bar">
+                <div class="pgr-fill ${fillCls}" style="width:${Math.min(pct,100)}%"></div>
+                <div class="pgr-pct">${pct}%</div>
+              </div>
+              <div class="pgr-txt">預估使用 ${c.usedEst.toLocaleString()} / ${c.budget.toLocaleString()} 點</div>
+            </div>
+          </td>
+          <td><div class="dt-line">${fmtDT(c.start)}</div><div class="dt-line">~ ${fmtDT(c.end)}</div></td>
+          <td><span class="badge ${c.sBadge}">${c.status}</span></td>
+          <td><label class="toggle"><input type="checkbox" ${c.enabled?'checked':''} onchange="onToggleCampaign(this, ${c.id})"><span class="slider"></span></label></td>
+          <td class="col-center">
+            <button class="btn sm ghost" onclick="openEditCampaign(${c.id})">編輯</button>
+            ${delBtn}
+          </td>
+        </tr>`;
+    }).join('');
+    document.getElementById('tbody-campaigns').innerHTML = rows;
+    document.getElementById('pagi-info').textContent = `顯示第 ${start+1} - ${end} 筆，共 ${total} 筆`;
+    // 排序圖示
+    document.querySelectorAll('#view-campaigns th.sortable').forEach(th=>th.classList.remove('asc','desc'));
+    document.querySelectorAll('#view-campaigns .sort-ic').forEach(ic=>ic.textContent='↕');
+    if(cSortKey){
+      const ic = document.getElementById('cic-'+cSortKey);
+      if(ic){ ic.textContent = cSortDir==='asc'?'↑':'↓'; ic.parentElement.classList.add(cSortDir); }
+    }
+    const totalPages = Math.ceil(total/PAGE_SIZE);
+    let pager = `<button class="pagi-btn" ${currentPage===1?'disabled':''} onclick="gotoPage(${currentPage-1})">‹</button>`;
+    for(let i=1;i<=totalPages;i++) pager += `<button class="pagi-btn ${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
+    pager += `<button class="pagi-btn" ${currentPage===totalPages?'disabled':''} onclick="gotoPage(${currentPage+1})">›</button>`;
+    document.getElementById('pagi-pages').innerHTML = pager;
+  }
+  function gotoPage(p){ currentPage=p; renderCampaigns(); }
+
+  /* 拖曳調整排序 */
+  let dragSrcId = null;
+  function onDragStart(e,id){ dragSrcId=id; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
+  function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+  function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+  function onDrop(e,targetId){
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if(dragSrcId===null || dragSrcId===targetId) return;
+    const src = campaigns.find(c=>c.id===dragSrcId);
+    const tgt = campaigns.find(c=>c.id===targetId);
+    if(!src || !tgt) return;
+    // 把 src.order 設為 tgt.order，其餘順位重排
+    const srcOrder = src.order, tgtOrder = tgt.order;
+    if(srcOrder < tgtOrder){
+      campaigns.forEach(c=>{ if(c.order>srcOrder && c.order<=tgtOrder) c.order--; });
+    }else{
+      campaigns.forEach(c=>{ if(c.order>=tgtOrder && c.order<srcOrder) c.order++; });
+    }
+    src.order = tgtOrder;
+    // 拖曳後切回手動排序模式
+    cSortKey = null;
+    renderCampaigns();
+  }
+  function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragSrcId=null; document.querySelectorAll('#view-campaigns tr').forEach(tr=>tr.classList.remove('drag-over')); }
+  function onOrderInput(id, val){
+    const v = parseInt(val,10);
+    if(isNaN(v) || v<1){ renderCampaigns(); return; }
+    const max = campaigns.length;
+    const target = Math.min(Math.max(v,1), max);
+    const src = campaigns.find(c=>c.id===id);
+    if(!src) return;
+    const srcOrder = src.order;
+    if(target===srcOrder){ renderCampaigns(); return; }
+    if(srcOrder < target){
+      campaigns.forEach(c=>{ if(c.order>srcOrder && c.order<=target) c.order--; });
+    }else{
+      campaigns.forEach(c=>{ if(c.order>=target && c.order<srcOrder) c.order++; });
+    }
+    src.order = target;
+    cSortKey = null;
+    renderCampaigns();
+  }
+  renderCampaigns();
+
+  function onToggleCampaign(input, id){
+    const c = campaigns.find(x=>x.id===id);
+    if(input.checked){ c.enabled=true; return; }
+    input.checked = true;
+    showConfirm({
+      title:'確定要停用此活動嗎？',
+      body:'關閉活動將立即停止於前台露出回饋標籤。',
+      sub:'已付款之訂單仍享有回饋資格，無法中途取消。',
+      okText:'確認停用', danger:true,
+      onOk:()=>{ c.enabled=false; renderCampaigns(); }
+    });
+  }
+  function askDelete(id, name, locked){
+    if(locked) return;
+    showConfirm({
+      title:'確定要刪除此活動嗎？',
+      body:`「${name}」刪除後將無法復原。`,
+      sub:'若此活動仍有已付款且等待發點的訂單，建議改為停用而非刪除。',
+      okText:'確認刪除', danger:true,
+      onOk:()=>{
+        const i = campaigns.findIndex(x=>x.id===id);
+        if(i>=0) campaigns.splice(i,1);
+        const tp = Math.max(1, Math.ceil(campaigns.length/PAGE_SIZE));
+        if(currentPage>tp) currentPage=tp;
+        renderCampaigns();
+      }
+    });
+  }
+
+  /* ===== Campaign Modal ===== */
+  let editingId = null;
+  function openNewCampaign(){
+    editingId = null;
+    document.getElementById('campaign-modal-title').textContent = '新增回饋活動';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-scope').value = 'all';
+    document.querySelector('input[name="start-mode"][value="now"]').checked = true;
+    document.querySelector('input[name="rwd-mode"][value="pct"]').checked = true;
+    document.getElementById('f-agree-1').checked = false;
+    document.getElementById('f-agree-2').checked = false;
+    onScopeChange(); onStartModeChange(); onRwdModeChange();
+    ['f-name','f-scope','f-start','f-end'].forEach(id=>document.getElementById(id).disabled=false);
+    document.querySelectorAll('input[name="rwd-mode"]').forEach(r=>r.disabled=false);
+    document.querySelectorAll('input[name="start-mode"]').forEach(r=>r.disabled=false);
+    openModal('modal-campaign');
+  }
+  function openEditCampaign(id){
+    editingId = id;
+    const c = campaigns.find(x=>x.id===id);
+    document.getElementById('campaign-modal-title').textContent = `編輯回饋活動 — ${c.name}`;
+    document.getElementById('f-name').value = c.name;
+    document.getElementById('f-scope').value = (c.scope==='全站'?'all':(c.scope==='指定分類'?'category':'product'));
+    document.getElementById('f-start').value = c.start;
+    document.getElementById('f-end').value = c.end;
+    document.getElementById('f-agree-1').checked = true;
+    document.getElementById('f-agree-2').checked = true;
+    onScopeChange(); onRwdModeChange();
+    const lock = c.locked;
+    document.getElementById('f-scope').disabled = lock;
+    document.getElementById('f-start').disabled = lock;
+    document.querySelectorAll('input[name="rwd-mode"]').forEach(r=>r.disabled = lock);
+    document.querySelectorAll('input[name="start-mode"]').forEach(r=>r.disabled = lock);
+    openModal('modal-campaign');
+  }
+  function onScopeChange(){
+    const v = document.getElementById('f-scope').value;
+    document.getElementById('range-category').classList.toggle('show', v==='category');
+    document.getElementById('range-product').classList.toggle('show', v==='product');
+    document.getElementById('threshold-wrap').style.display = (v==='orderprice') ? 'flex' : 'none';
+    refreshRwdTip();
+  }
+  function onStartModeChange(){
+    const v = document.querySelector('input[name="start-mode"]:checked').value;
+    document.getElementById('f-start').disabled = (v==='now');
+  }
+  function onRwdModeChange(){
+    const m = document.querySelector('input[name="rwd-mode"]:checked').value;
+    document.getElementById('rwd-pct-wrap').style.display = (m==='pct') ? 'inline-flex' : 'none';
+    document.getElementById('rwd-fix-wrap').style.display = (m==='fix') ? 'inline-flex' : 'none';
+    refreshRwdTip();
+  }
+  function refreshRwdTip(){
+    const scope = document.getElementById('f-scope').value;
+    const tip = document.getElementById('rwd-tip-text');
+    if(!tip) return;
+    let html='';
+    if(scope==='all' || scope==='orderprice'){
+      html = `<span class="lbl">計算公式</span>訂單總額 × 回饋比例% ＝ 回饋點數（四捨五入至整數位）
+              <span class="lbl">說明</span>「訂單總額」不扣除全站折扣。例：訂單總額 500 元、全站折扣 9 折、結帳金額 450 元 → 以訂單總額 500 元計算。`;
+    }else{
+      html = `<span class="lbl">計算公式</span>符合條件的商品總額 × 回饋比例% ＝ 回饋點數（四捨五入至整數位）
+              <span class="lbl">說明</span>「商品總額」不扣除全站折扣。例：符合條件的商品總額 500 元、全站折扣 9 折、結帳金額 450 元 → 以商品總額 500 元計算。`;
+    }
+    tip.innerHTML = html;
+  }
+  function gotoSettingsFromModal(){
+    closeModal('modal-campaign');
+    navTo('points');
+    // 切到「儲值與設定」tab
+    setTimeout(()=>{
+      document.querySelectorAll('#view-points .tab').forEach(t=>{
+        const isSet = t.dataset.tab==='settings';
+        t.classList.toggle('active', isSet);
+      });
+      ['ledger','analysis','settings'].forEach(name=>{
+        document.getElementById('tab-'+name).style.display = (name==='settings') ? 'block':'none';
+      });
+    }, 50);
+  }
+  function onCampaignSave(){
+    const startMode = document.querySelector('input[name="start-mode"]:checked').value;
+    if(startMode==='now' && editingId===null){
+      showConfirm({
+        title:'確認立即啟用？',
+        body:'活動開始進行後，將無法再編輯「回饋條件」與「回饋方式」。',
+        sub:'若需先排程未來時間，請選「排程啟用」。',
+        okText:'確認啟用',
+        onOk:()=>{ closeModal('modal-campaign'); }
+      });
+    }else{ closeModal('modal-campaign'); }
+  }
+
+  /* ===== Category Picker ===== */
+  const catData = [
+    {name:'美妝保養', count:2, total:8, subs:[{name:'臉部保養',sel:false},{name:'頭髮護理',sel:true},{name:'身體保養',sel:false},{name:'香氛',sel:true}]},
+    {name:'3C 用品', count:0, total:5, subs:[{name:'手機配件',sel:false},{name:'電腦周邊',sel:false},{name:'穿戴裝置',sel:false}]},
+    {name:'禮品禮盒', count:1, total:4, subs:[{name:'伴手禮',sel:true},{name:'高端禮盒',sel:false},{name:'節慶禮包',sel:false}]},
+    {name:'食品飲品', count:0, total:6, subs:[{name:'糕餅點心',sel:false},{name:'飲品',sel:false},{name:'保健食品',sel:false}]},
+    {name:'家居生活', count:0, total:7, subs:[{name:'寢具',sel:false},{name:'清潔用品',sel:false},{name:'廚房用具',sel:false}]},
+    {name:'服飾配件', count:0, total:9, subs:[{name:'男裝',sel:false},{name:'女裝',sel:false},{name:'童裝',sel:false},{name:'飾品配件',sel:false}]},
+    {name:'運動戶外', count:0, total:5, subs:[{name:'瑜珈/健身',sel:false},{name:'露營野餐',sel:false}]},
+    {name:'清倉專區', count:0, total:3, subs:[{name:'季末出清',sel:false}]}
+  ];
+  let catActive = 0;
+  function renderCatPicker(){
+    document.getElementById('cat-left').innerHTML = catData.map((c,i)=>`
+      <div class="pl-item ${i===catActive?'active':''} ${c.count>0?'has-sel':''}" onclick="catActive=${i};renderCatPicker()">
+        <span>${c.name}</span>
+        <span style="display:flex;align-items:center"><span class="count-pill">${c.count}</span><span class="arrow">›</span></span>
+      </div>`).join('');
+    const sub = catData[catActive];
+    document.getElementById('cat-right').innerHTML = sub.subs.map((s,j)=>`
+      <div class="pr-item">
+        <input type="checkbox" ${s.sel?'checked':''} onchange="onCatCheck(${catActive},${j},this.checked)">
+        <span>${s.name}</span>
+      </div>`).join('');
+    let total=0, selected=0;
+    catData.forEach(c=>{ total+=c.total; selected+=c.count });
+    document.getElementById('cat-sel-count').textContent = `${selected}/${total}`;
+  }
+  function onCatCheck(i,j,v){ catData[i].subs[j].sel=v; catData[i].count=catData[i].subs.filter(s=>s.sel).length; renderCatPicker(); }
+  renderCatPicker();
+
+  /* ===== Product Picker ===== */
+  const prdData = [
+    {cat:'美妝保養', sel:1, total:6, items:[
+      {name:'AROMASE 5α 洗髮精 200ml', sku:'AS-001', sel:true},
+      {name:'AROMASE 草本舒緩護髮素', sku:'AS-002', sel:false},
+      {name:'AROMASE 控油髮浴精', sku:'AS-003', sel:false},
+      {name:'AROMASE 補水保濕乳', sku:'AS-101', sel:false},
+      {name:'AROMASE 純植精油', sku:'AS-201', sel:false},
+    ]},
+    {cat:'禮品禮盒', sel:0, total:4, items:[
+      {name:'SUNTONE 漢餅伴手禮', sku:'ST-G01', sel:false},
+      {name:'SUNTONE 節慶八角禮盒', sku:'ST-G02', sel:false},
+      {name:'SUNTONE 春節大禮盒', sku:'ST-G03', sel:false},
+    ]},
+    {cat:'3C 用品', sel:0, total:8, items:[
+      {name:'TWS 真無線耳機 Pro', sku:'TWS-PRO', sel:false},
+      {name:'快充行動電源 20000', sku:'BP-20K', sel:false},
+      {name:'磁吸無線充電盤', sku:'WC-M01', sel:false},
+    ]},
+    {cat:'食品飲品', sel:0, total:5, items:[
+      {name:'手工冷萃咖啡禮盒', sku:'CF-CB05', sel:false},
+      {name:'天然植物精萃茶包', sku:'TE-PL01', sel:false},
+    ]},
+  ];
+  let prdActive = 0;
+  function renderPrdPicker(){
+    document.getElementById('prd-left').innerHTML = prdData.map((c,i)=>`
+      <div class="pl-item ${i===prdActive?'active':''} ${c.sel>0?'has-sel':''}" onclick="prdActive=${i};renderPrdPicker()">
+        <span>${c.cat}</span>
+        <span style="display:flex;align-items:center"><span class="count-pill">${c.sel}</span><span class="arrow">›</span></span>
+      </div>`).join('');
+    const c = prdData[prdActive];
+    document.getElementById('prd-right').innerHTML = c.items.map((p,j)=>`
+      <div class="pr-item">
+        <input type="checkbox" ${p.sel?'checked':''} onchange="onPrdCheck(${prdActive},${j},this.checked)">
+        <div><div>${p.name}</div><div class="muted">SKU: ${p.sku}</div></div>
+      </div>`).join('');
+    let t=0,s=0; prdData.forEach(c=>{ t+=c.total; s+=c.sel });
+    document.getElementById('prd-sel-count').textContent = `${s}/${t}`;
+  }
+  function onPrdCheck(i,j,v){ prdData[i].items[j].sel=v; prdData[i].sel=prdData[i].items.filter(it=>it.sel).length; renderPrdPicker(); }
+  renderPrdPicker();
+
+  /* ===== Tabs in 點數管理 ===== */
+  document.querySelectorAll('#view-points .tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('#view-points .tab').forEach(x=>x.classList.toggle('active', x===t));
+      const k = t.dataset.tab;
+      ['ledger','analysis','settings'].forEach(name=>{
+        document.getElementById('tab-'+name).style.display = (k===name ? 'block':'none');
+      });
+    });
+  });
+
+  /* ===== Ledger (發放明細) with sorting + 點 row 開 detail ===== */
+  const ledgerData = [
+    {sentAt:'2026-05-18T02:15', orderId:'SL2026051800123', member:'陳怡倫', email:'ch***@gmail.com', activity:'聖誕禮品季 - 全站底', points:26, status:'已領取', sBadge:'green', claimedAt:'2026-05-18T14:32', expiresAt:'2026-08-18T23:59', orderAmount:2580},
+    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700091', member:'林俊宇', email:'li***@gmail.com', activity:'3C 加碼回饋', points:128, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-17T23:59', orderAmount:3200},
+    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700088', member:'王雅芬', email:'wa***@gmail.com', activity:'熱銷洗髮系列', points:45, status:'已領取', sBadge:'green', claimedAt:'2026-05-17T09:11', expiresAt:'2026-08-17T23:59', orderAmount:1500},
+    {sentAt:'2026-05-16T02:15', orderId:'SL2026051600142', member:'吳怡仁', email:'wu***@yahoo.com.tw', activity:'聖誕禮品季 - 全站底', points:38, status:'已過期', sBadge:'red', claimedAt:null, expiresAt:'2026-05-12T23:59', orderAmount:3800},
+    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500098', member:'張育瑩', email:'ch***@gmail.com', activity:'3C 加碼回饋', points:192, status:'已領取', sBadge:'green', claimedAt:'2026-05-15T21:45', expiresAt:'2026-08-15T23:59', orderAmount:4800},
+    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500076', member:'李俊豪', email:'le***@gmail.com', activity:'熱銷洗髮系列', points:21, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-15T23:59', orderAmount:700},
+    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400055', member:'謝玟琪', email:'hs***@gmail.com', activity:'聖誕禮品季 - 全站底', points:52, status:'已領取', sBadge:'green', claimedAt:'2026-05-14T19:20', expiresAt:'2026-08-14T23:59', orderAmount:5200},
+    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400052', member:'黃志強', email:'hu***@gmail.com', activity:'夏日折扣加碼', points:38, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-14T23:59', orderAmount:1520},
+    {sentAt:'2026-05-13T02:15', orderId:'SL2026051300044', member:'葉淑芬', email:'ye***@gmail.com', activity:'會員回饋日', points:50, status:'已領取', sBadge:'green', claimedAt:'2026-05-13T12:08', expiresAt:'2026-08-13T23:59', orderAmount:980},
+    {sentAt:'2026-05-12T02:15', orderId:'SL2026051200031', member:'郭明翰', email:'ku***@gmail.com', activity:'3C 加碼回饋', points:96, status:'已領取', sBadge:'green', claimedAt:'2026-05-12T22:14', expiresAt:'2026-08-12T23:59', orderAmount:2400}
+  ];
+  let sortKey = 'sentAt'; let sortDir = 'desc';
+  function sortLedger(key){
+    if(sortKey===key){ sortDir = (sortDir==='asc')?'desc':'asc'; }
+    else{ sortKey=key; sortDir = (key==='sentAt' || key==='claimedAt' || key==='expiresAt')?'desc':'asc'; }
+    renderLedger();
+  }
+  function compareVal(a,b,key){
+    const va=a[key], vb=b[key];
+    if(va===null||va===undefined) return 1;
+    if(vb===null||vb===undefined) return -1;
+    // numeric
+    if(typeof va==='number' && typeof vb==='number') return va-vb;
+    // date-like (ISO)
+    if((''+va).match(/^\d{4}-\d{2}-\d{2}T/)) return new Date(va) - new Date(vb);
+    // 中文照筆畫近似（用 zh-Hant locale）
+    return String(va).localeCompare(String(vb), 'zh-Hant');
+  }
+  function renderLedger(){
+    const data = [...ledgerData].sort((a,b)=>{
+      const c = compareVal(a,b,sortKey);
+      return sortDir==='asc' ? c : -c;
+    });
+    document.querySelectorAll('th.sortable').forEach(th=>th.classList.remove('asc','desc'));
+    document.querySelectorAll('.sort-ic').forEach(ic=>ic.textContent='↕');
+    const th = document.querySelector(`th.sortable [id="ic-${sortKey}"]`)?.parentElement;
+    if(th){ th.classList.add(sortDir); }
+    const ic = document.getElementById('ic-'+sortKey);
+    if(ic){ ic.textContent = (sortDir==='asc')?'↑':'↓'; }
+
+    document.getElementById('tbody-ledger').innerHTML = data.map((r,idx)=>{
+      const statusColor = r.status==='未領取' ? 'gray' : (r.status==='已領取'?'green':(r.status==='已過期'?'red':'yellow'));
+      return `
+      <tr class="clickable" onclick="openOrderDetail(${idx})">
+        <td>${fmtDT(r.sentAt)}</td>
+        <td class="cell-strong" style="color:var(--primary)">#${r.orderId}</td>
+        <td>${r.member}<div class="muted">${r.email}</div></td>
+        <td>${r.activity}</td>
+        <td class="cell-strong">${r.points}</td>
+        <td><span class="badge ${statusColor}">${r.status}</span></td>
+        <td>${r.claimedAt ? fmtDT(r.claimedAt) : '<span class="muted">—</span>'}</td>
+        <td>${fmtDT(r.expiresAt)}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('ledger-count').textContent = data.length;
+    // store sorted data for detail open
+    window._ledgerSorted = data;
+  }
+  renderLedger();
+
+  function clearLedgerFilter(){
+    document.getElementById('f-status').selectedIndex = 0;
+    document.getElementById('f-camp').selectedIndex = 0;
+    document.querySelectorAll('#tab-ledger .input').forEach(i=>{ if(i.type!=='date') i.value=''; });
+  }
+
+  /* Order Detail Modal */
+  // mock phone / lineuid per member for demo
+  const memberExtra = {
+    '陳怡倫': {phone:'0912-345-678', lineuid:'Uc9f3a1b2d4e5f6789abc'},
+    '林俊宇': {phone:'0933-211-456', lineuid:null},
+    '王雅芬': {phone:'0922-887-001', lineuid:'Uf1a2b3c4d5e6f70123'},
+    '吳怡仁': {phone:null, lineuid:null},
+    '張育瑩': {phone:'0988-654-321', lineuid:'Uabc1def2345678900'},
+    '李俊豪': {phone:'0911-222-333', lineuid:null},
+    '謝玟琪': {phone:'0966-123-456', lineuid:'U987def1234abc5678'},
+    '黃志強': {phone:null, lineuid:'U112abc3456def7890'},
+    '葉淑芬': {phone:'0977-888-999', lineuid:null},
+    '郭明翰': {phone:'0900-111-222', lineuid:'Uf0e1d2c3b4a5967810'},
+  };
+  // mock order content per orderId
+  const orderContent = {
+    'SL2026051800123': '購物袋 × 1, 聖誕禮盒 × 2',
+    'SL2026051700091': 'TWS 耳機 × 1, 行動電源 × 1',
+    'SL2026051700088': 'AROMASE 洗髮精 × 3',
+    'SL2026051600142': '聖誕禮盒 × 1, 伴手禮 × 2',
+    'SL2026051500098': '快充行動電源 × 2, 磁吸充電盤 × 1',
+    'SL2026051500076': 'AROMASE 洗髮精 × 1',
+    'SL2026051400055': '高端禮盒 × 2, 節慶禮包 × 1',
+    'SL2026051400052': 'AROMASE 精油 × 2',
+    'SL2026051300044': '會員禮包 × 1',
+    'SL2026051200031': 'TWS 耳機 Pro × 1',
+  };
+  // mock reward condition / method per activity
+  const activityMeta = {
+    '聖誕禮品季 - 全站底': {cond:'全站訂單', method:'1% 比例回饋'},
+    '3C 加碼回饋':         {cond:'指定分類：3C 用品', method:'4% 比例回饋'},
+    '熱銷洗髮系列':        {cond:'指定品項：12 件商品', method:'3% 比例回饋'},
+    '夏日折扣加碼':        {cond:'指定品項：18 件商品', method:'2.5% 比例回饋'},
+    '會員回饋日':          {cond:'全站訂單', method:'固定 50 點'},
+  };
+  function dash(v){ return (v===null||v===undefined||v==='') ? '-' : v; }
+  function openOrderDetail(idx){
+    const r = window._ledgerSorted[idx];
+    const statusColor = r.status==='未領取' ? 'gray' : (r.status==='已領取'?'green':(r.status==='已過期'?'red':'yellow'));
+    const extra = memberExtra[r.member] || {};
+    const content = orderContent[r.orderId] || '-';
+    const actMeta = activityMeta[r.activity] || {cond:'-', method:'-'};
+    const completedAt = fmtDT(new Date(new Date(r.sentAt).getTime() - 7*86400000));
+    const createdAt   = fmtDT(new Date(new Date(r.sentAt).getTime() - 9*86400000));
+    // points breakdown — randomly split into prepaid vs deposited for demo
+    const prepaidPts  = r.points > 10 ? Math.floor(r.points * 0.3) : 0;
+    const depositPts  = r.points - prepaidPts;
+    document.getElementById('od-title').textContent = `發放詳情 ─ #${r.orderId}`;
+    document.getElementById('od-body').innerHTML = `
+      <div class="detail-section">
+        <h4>訂單資訊</h4>
+        <div class="detail-row"><div class="k">訂單編號</div><div class="v" style="color:var(--primary);font-weight:600">#${r.orderId}</div></div>
+        <div class="detail-row"><div class="k">訂單金額</div><div class="v">NT$ ${r.orderAmount.toLocaleString()}</div></div>
+        <div class="detail-row"><div class="k">訂單內容</div><div class="v">${content}</div></div>
+        <div class="detail-row"><div class="k">訂單狀態</div><div class="v"><span class="badge green">已完成</span></div></div>
+        <div class="detail-row" style="align-items:flex-start">
+          <div class="k" style="padding-top:2px">訂單歷程</div>
+          <div class="v">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0"></span>
+                <span style="color:var(--text-2)">成立</span>
+                <span style="color:var(--text-3)">${createdAt}</span>
+              </div>
+              <div style="width:1px;height:12px;background:#E5E7EB;margin-left:2px"></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0"></span>
+                <span style="color:var(--text-2)">完成</span>
+                <span style="color:var(--text-3)">${completedAt}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>會員資訊</h4>
+        <div class="detail-row"><div class="k">姓名</div><div class="v">${dash(r.member)}</div></div>
+        <div class="detail-row"><div class="k">信箱</div><div class="v">${dash(r.email)}</div></div>
+        <div class="detail-row"><div class="k">電話</div><div class="v">${dash(extra.phone)}</div></div>
+        <div class="detail-row"><div class="k">LINE UID</div><div class="v">${extra.lineuid ? `<code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px">${extra.lineuid}</code>` : '-'}</div></div>
+      </div>
+      <div class="detail-section">
+        <h4>回饋活動</h4>
+        <div class="detail-row"><div class="k">回饋活動名稱</div><div class="v"><strong>${r.activity}</strong></div></div>
+        <div class="detail-row"><div class="k">回饋條件</div><div class="v">${actMeta.cond}</div></div>
+        <div class="detail-row"><div class="k">回饋方式</div><div class="v">${actMeta.method}</div></div>
+      </div>
+      <div class="detail-section">
+        <h4>點數狀態</h4>
+        <div class="detail-row"><div class="k">發送時間</div><div class="v">${fmtDT(r.sentAt)}</div></div>
+        <div class="detail-row"><div class="k">領取狀態</div><div class="v"><span class="badge ${statusColor}">${r.status}</span></div></div>
+        <div class="detail-row"><div class="k">領取時間</div><div class="v">${r.claimedAt ? fmtDT(r.claimedAt) : '-'}</div></div>
+        <div class="detail-row"><div class="k">到期時間</div><div class="v">${fmtDT(r.expiresAt)}</div></div>
+        <div style="background:#F9FAFB;border:1px dashed var(--border);border-radius:6px;padding:12px 14px;margin-top:8px">
+          <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">點數來源明細（共 ${r.points} 點）</div>
+          <div class="detail-row" style="padding:4px 0">
+            <div class="k" style="min-width:140px">儲值點數發放</div>
+            <div class="v"><strong>${depositPts} 點</strong></div>
+          </div>
+          <div class="detail-row" style="padding:4px 0;border-bottom:none">
+            <div class="k" style="min-width:140px">預支點數發放</div>
+            <div class="v">${prepaidPts > 0 ? `<strong style="color:var(--warning)">${prepaidPts} 點</strong>` : '<span style="color:var(--text-3)">0 點</span>'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    openModal('modal-order-detail');
+  }
+
+  /* ===== Charts ===== */
+  function renderBars(boxId, xId, data, labels, twoSeries){
+    const max = Math.max(...(twoSeries ? data.flat() : data));
+    if(twoSeries){
+      const box = document.getElementById(boxId);
+      box.innerHTML = data[0].map((v,i)=>{
+        const v2 = data[1][i];
+        const h1 = Math.round(v/max*100);
+        const h2 = Math.round(v2/max*100);
+        return `<div style="flex:1;display:flex;gap:2px;align-items:flex-end;height:100%">
+          <div class="bar" style="height:${h1}%"></div>
+          <div class="bar bar-2" style="height:${h2}%"></div>
+        </div>`;
+      }).join('');
+    }else{
+      document.getElementById(boxId).innerHTML = data.map(v=>{
+        const h = Math.round(v/max*100);
+        return `<div class="bar" style="height:${h}%"><span class="v">${v}</span></div>`;
+      }).join('');
+    }
+    document.getElementById(xId).innerHTML = labels.map(l=>`<span>${l}</span>`).join('');
+  }
+  // 回饋總覽：使用回饋訂單 / 未使用回饋訂單（14 日） — 折線圖
+  function renderLineChart(svgId, xId, seriesA, seriesB, labels){
+    const W = 600, H = 240;
+    const padL = 40, padR = 12, padT = 16, padB = 28;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const max = Math.max(...seriesA, ...seriesB);
+    const step = seriesA.length>1 ? innerW/(seriesA.length-1) : innerW;
+    const yTicks = 4;
+    const yLines = [], yLabels = [];
+    for(let i=0;i<=yTicks;i++){
+      const y = padT + innerH*(i/yTicks);
+      const val = Math.round(max*(1 - i/yTicks));
+      yLines.push(`<line class="grid" x1="${padL}" x2="${padL+innerW}" y1="${y}" y2="${y}"/>`);
+      yLabels.push(`<text class="axis-label" x="${padL-6}" y="${y+3}" text-anchor="end">${val}</text>`);
+    }
+    function pts(data){
+      return data.map((v,i)=>`${padL + step*i},${padT + innerH*(1 - v/max)}`).join(' ');
+    }
+    function dots(data, cls){
+      return data.map((v,i)=>{
+        const x = padL + step*i;
+        const y = padT + innerH*(1 - v/max);
+        return `<circle class="${cls}" cx="${x}" cy="${y}" r="3"/>`;
+      }).join('');
+    }
+    // area for series A (使用回饋訂單)
+    const areaPts = pts(seriesA);
+    const area = `M ${padL},${padT+innerH} L ${areaPts.replace(/ /g,' L ')} L ${padL+innerW},${padT+innerH} Z`;
+
+    const svg = document.getElementById(svgId);
+    svg.innerHTML = `
+      ${yLines.join('')}
+      ${yLabels.join('')}
+      <path class="area-a" d="${area}"/>
+      <polyline class="line-b" points="${pts(seriesB)}"/>
+      <polyline class="line-a" points="${pts(seriesA)}"/>
+      ${dots(seriesB,'dot-b')}
+      ${dots(seriesA,'dot-a')}
+    `;
+    // X axis labels — 顯示間隔避免擠在一起
+    const showEvery = Math.ceil(labels.length/7);
+    document.getElementById(xId).innerHTML = labels.map((l,i)=>{
+      const show = (i%showEvery===0 || i===labels.length-1);
+      return `<span style="${show?'':'visibility:hidden'}">${l}</span>`;
+    }).join('');
+  }
+  (function(){
+    const a=[28,35,42,30,45,38,52,48,35,40,46,42,55,62];
+    const b=[55,62,75,68,70,82,78,80,72,76,85,79,88,95];
+    const labels = Array.from({length:14},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(13-i)); return (d.getMonth()+1)+'/'+d.getDate(); });
+    renderLineChart('chart-order','chart-order-x',a,b,labels);
+  })();
+  // 點數分析：12 個月發放趨勢，當月有色其餘淺灰
+  (function(){
+    const data=[3850,4260,5840,7210,8420,9150,8920,9680,10420,11250,12150,12850];
+    const labels = Array.from({length:12},(_,i)=>{ const d=new Date(); d.setMonth(d.getMonth()-(11-i)); return (d.getMonth()+1)+'月'; });
+    const lastIdx = data.length - 1;
+    const max = Math.max(...data);
+    document.getElementById('chart-points').innerHTML = data.map((v,i)=>{
+      const h = Math.round(v/max*100);
+      const isCurrent = (i === lastIdx);
+      const style = isCurrent
+        ? `height:${h}%;background:linear-gradient(180deg,#3B82F6,#1875F0)`
+        : `height:${h}%;background:#E5E7EB`;
+      const valColor = isCurrent ? 'var(--text-2)' : 'var(--text-3)';
+      return `<div class="bar" style="${style}"><span class="v" style="color:${valColor}">${v.toLocaleString()}</span></div>`;
+    }).join('');
+    document.getElementById('chart-points-x').innerHTML = labels.map((l,i)=>{
+      const c = (i===lastIdx) ? 'var(--text-1)' : 'var(--text-3)';
+      const w = (i===lastIdx) ? '600' : '400';
+      return `<span style="color:${c};font-weight:${w}">${l}</span>`;
+    }).join('');
+  })();
+</script>
+
+</body>
+</html>
