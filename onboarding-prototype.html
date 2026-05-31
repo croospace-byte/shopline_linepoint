@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>首次開啟流程 Prototype v3｜點數回饋</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --primary:#1875F0;--primary-hover:#0F65D8;
+  --sidebar-bg:#1F2937;--sidebar-hover:#374151;--sidebar-text:#D1D5DB;
+  --page-bg:#F5F7FA;
+  --border:#E5E7EB;--text-1:#111827;--text-2:#4B5563;--text-3:#9CA3AF;
+  --success:#16A34A;--danger:#DC2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text-1);background:var(--page-bg);font-size:14px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+
+/* ── Layout ── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--sidebar-bg);flex-shrink:0;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
+.main-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:52px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:5}
+.content{flex:1;padding:24px}
+
+/* ── Sidebar ── */
+.brand{padding:14px 18px;font-weight:700;font-size:16px;color:#fff;border-bottom:1px solid #374151;display:flex;align-items:center;gap:8px}
+.brand-logo{width:22px;height:22px;background:var(--primary);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800}
+.nav-section{padding:10px 18px 4px;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 18px;color:var(--sidebar-text);font-size:13px;cursor:pointer;border-left:3px solid transparent}
+.nav-item:hover{background:var(--sidebar-hover);color:#fff}
+.nav-item.dim{opacity:.4;pointer-events:none}
+.nav-item.active{background:var(--sidebar-hover);color:#fff;border-left-color:var(--primary)}
+.nav-group{background:#111827;display:flex;align-items:center;gap:8px;padding:8px 18px;color:#fff;font-size:13px;font-weight:600}
+.nav-sub .nav-item{padding-left:40px}
+.nav-subtab .nav-item{padding-left:52px;font-size:12px}
+
+/* ── Topbar ── */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
+.breadcrumb .here{color:var(--text-1);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.shop-name{font-size:13px;color:var(--text-2)}
+.shop-name strong{color:var(--text-1)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1875F0,#7E5EE5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.help-wrap{position:relative}
+.help-btn{width:28px;height:28px;border-radius:50%;background:#F3F4F6;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#4B5563;cursor:pointer}
+.help-btn:hover{background:#E5E7EB}
+.help-menu{position:absolute;top:calc(100% + 8px);right:0;width:196px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:200}
+.help-menu.open{display:block}
+.help-menu a{display:flex;align-items:center;gap:8px;padding:11px 16px;font-size:13px;color:var(--text-1);text-decoration:none;border-bottom:1px solid var(--border);cursor:pointer}
+.help-menu a:last-child{border-bottom:none}
+.help-menu a:hover{background:#F9FAFB}
+
+/* ── Views ── */
+.view{display:none}
+.view.show{display:block}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-desc{font-size:13px;color:var(--text-2)}
+.placeholder{height:140px;background:#fff;border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text-1);cursor:pointer;transition:background .15s}
+.btn:hover{background:#F9FAFB}
+.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn.primary:hover{background:var(--primary-hover)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn.ghost{background:transparent;border:none;color:var(--text-2)}
+.btn.sm{padding:6px 12px;font-size:12px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent}
+.tab:hover{color:var(--text-1)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.filter-bar label{font-size:12px;font-weight:600;color:var(--text-2);white-space:nowrap}
+.filter-bar select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:#fff}
+.filter-bar .date-hint{font-size:12px;color:var(--text-3)}
+
+/* ── Modal overlay ── */
+.overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.hidden{display:none}
+.modal{background:#fff;border-radius:10px;width:572px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.22);overflow:hidden}
+
+/* Modal header */
+.modal-hd{padding:18px 22px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.step-track{display:flex;align-items:center;margin-bottom:14px;gap:0}
+.s-pip{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-3);background:#fff;flex-shrink:0;transition:all .2s}
+.s-pip.active{border-color:var(--primary);color:var(--primary)}
+.s-pip.done{background:var(--primary);border-color:var(--primary);color:#fff}
+.s-conn{height:2px;width:48px;background:var(--border);transition:background .2s}
+.s-conn.done{background:var(--primary)}
+.modal-title{font-size:16px;font-weight:700;color:var(--text-1)}
+.modal-sub{font-size:12px;color:var(--text-2);margin-top:3px}
+
+/* Notice banner */
+.notice{padding:12px 22px;display:flex;gap:10px;flex-shrink:0}
+.notice.yellow{background:#FFFBEB;border-bottom:1px solid #FDE68A}
+.notice.blue{background:#EFF6FF;border-bottom:1px solid #BFDBFE}
+.notice .ni{font-size:15px;flex-shrink:0;margin-top:1px}
+.notice p{font-size:12px;line-height:1.7;color:#78350F}
+.notice.blue p{color:#1E3A8A}
+.notice p strong{display:block;font-weight:700;margin-bottom:1px}
+
+/* Modal body */
+.modal-bd{padding:22px;overflow-y:auto;flex:1}
+.field{margin-bottom:20px}
+.field-label{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:7px}
+.req{color:var(--danger);font-size:11px}
+.hint{font-size:12px;color:var(--text-3);margin-top:5px;line-height:1.5}
+.input,.sel{padding:9px 11px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;background:#fff;color:var(--text-1);width:100%}
+.input:focus,.sel:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.input.bad,.sel.bad{border-color:var(--danger)}
+.input:disabled{background:#F9FAFB;color:var(--text-3);cursor:not-allowed}
+.err{font-size:12px;color:var(--danger);margin-top:4px;display:none}
+.err.on{display:block}
+.readonly-field{padding:10px 14px;background:#F9FAFB;border:1px solid var(--border);border-radius:6px;display:flex;justify-content:space-between;align-items:center}
+.readonly-field .rv{font-size:13px;font-weight:600}
+.readonly-field .rs{font-size:12px;color:var(--text-3)}
+
+/* Channel checkboxes */
+.ch-list{display:flex;flex-direction:column;gap:8px}
+.ch-row{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s}
+.ch-row.on{border-color:var(--primary)}
+.ch-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none}
+.ch-head:hover{background:#F8FAFF}
+.ch-row.on .ch-head{background:#EFF6FF}
+.ch-cb{width:15px;height:15px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
+.ch-name{font-size:13px;font-weight:500}
+.ch-body{display:none;padding:12px 14px 14px;background:#F8FBFF;border-top:1px solid #BFDBFE}
+.ch-row.on .ch-body{display:block}
+.ch-body label{font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:5px}
+.ch-body .input{font-family:monospace;font-size:12px}
+.ch-body .hint{font-size:11px;color:var(--text-3);margin-top:4px}
+
+/* Time picker */
+.time-wrap{display:flex;align-items:center;gap:6px}
+.t-num{width:62px;padding:9px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;text-align:center;font-family:inherit}
+.t-num:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.t-num.bad{border-color:var(--danger)}
+.t-sep{font-size:16px;font-weight:700;color:var(--text-2);line-height:1}
+.t-ampm{width:74px;padding:9px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit}
+.t-ampm:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.t-ampm.bad{border-color:var(--danger)}
+
+/* Inline limit */
+.limit-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.lopt{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;user-select:none}
+.lopt input{accent-color:var(--primary);width:14px;height:14px;cursor:pointer}
+.limit-inline{display:none;align-items:center;gap:6px}
+.limit-inline.on{display:flex}
+.limit-inline .input{width:106px}
+.limit-inline .unit{font-size:13px;color:var(--text-2);white-space:nowrap}
+
+/* Notification rows */
+.notif-rows{display:flex;flex-direction:column;gap:12px}
+.notif-row{display:flex;align-items:center;gap:10px}
+.notif-row .nl{flex:1;font-size:13px;color:var(--text-1)}
+.notif-row .nl small{display:block;font-size:11px;color:var(--text-3)}
+.notif-row .input{width:68px;text-align:center}
+.notif-row .unit{font-size:13px;color:var(--text-2);white-space:nowrap}
+
+/* Modal footer */
+.modal-ft{padding:14px 22px;border-top:1px solid var(--border);background:#FAFBFC;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+
+/* ── Tutorial ── */
+.tut{position:fixed;inset:0;z-index:80;display:none}
+.tut.on{display:block}
+.tut-bg{position:fixed;inset:0}
+.spotlight{position:fixed;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);transition:all .25s ease;z-index:82;pointer-events:none}
+.tut-card{position:fixed;width:300px;background:#fff;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:18px 20px 16px;z-index:83;transition:all .25s ease}
+.tut-step{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.tut-card h4{font-size:14px;font-weight:700;margin-bottom:7px}
+.tut-card p{font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:14px}
+.tut-foot{display:flex;align-items:center;justify-content:space-between}
+.tut-dots{display:flex;gap:5px}
+.tut-dots span{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.tut-dots span.on{background:var(--primary)}
+.tut-btns{display:flex;align-items:center;gap:7px}
+.tut-skip{background:none;border:none;font-size:12px;color:var(--text-3);cursor:pointer;padding:4px 0}
+.tut-skip:hover{color:var(--text-2)}
+.tut-back,.tut-next{padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;border:none;cursor:pointer}
+.tut-back{background:#F3F4F6;color:var(--text-2)}
+.tut-back:hover{background:#E5E7EB}
+.tut-next{background:var(--primary);color:#fff}
+.tut-next:hover{background:var(--primary-hover)}
+.tut-arrow{position:absolute;width:0;height:0;pointer-events:none}
+.arr-top{border:8px solid transparent;border-bottom-color:#fff;top:-16px;left:22px}
+.arr-bottom{border:8px solid transparent;border-top-color:#fff;bottom:-16px;left:22px}
+.arr-left{border:8px solid transparent;border-right-color:#fff;left:-16px;top:18px}
+</style>
+</head>
+<body>
+
+<!-- ══ APP SHELL ══ -->
+<div class="app">
+  <div class="sidebar">
+    <div class="brand"><div class="brand-logo">S</div> SHOPLINE</div>
+    <div class="nav-section" style="margin-top:8px">商店管理</div>
+    <div class="nav-item dim">🛍 商品</div>
+    <div class="nav-item dim">📦 訂單</div>
+    <div class="nav-item dim">👥 顧客</div>
+    <div class="nav-section" style="margin-top:6px">行銷</div>
+    <div class="nav-item dim">🎁 優惠券</div>
+    <div class="nav-section" style="margin-top:6px">應用程式</div>
+    <div class="nav-group">⭐ 點數回饋 <span style="margin-left:auto;font-size:10px;background:rgba(255,255,255,.15);padding:1px 6px;border-radius:3px;font-weight:400">App</span></div>
+    <div class="nav-sub" id="navSub">
+      <div class="nav-item" id="navOv" onclick="go('ov')">回饋總覽</div>
+      <div class="nav-item active" id="navCp" onclick="go('cp')">回饋活動</div>
+      <div class="nav-item" id="navPt" onclick="go('pt')">點數管理</div>
+    </div>
+    <div class="nav-subtab" id="subTabs" style="display:none">
+      <div class="nav-item" id="stDetail" onclick="goTab('detail')">發放明細</div>
+      <div class="nav-item" id="stAnal" onclick="goTab('anal')">點數分析</div>
+      <div class="nav-item" id="stSet" onclick="goTab('set')">餘額與設定</div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="topbar">
+      <div class="breadcrumb">應用程式 › 點數回饋 › <span class="here" id="bcHere">回饋活動</span></div>
+      <div class="topbar-right">
+        <span class="shop-name">商店：<strong>12CM Official</strong></span>
+        <div class="help-wrap">
+          <div class="help-btn" id="helpBtn">？</div>
+          <div class="help-menu" id="helpMenu">
+            <a onclick="restartTut()">🎓 重新觀看引導</a>
+            <a>📄 操作說明文件 ↗</a>
+          </div>
+        </div>
+        <div class="avatar">R</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- 回饋總覽 -->
+      <div class="view" id="vOv">
+        <div class="page-head">
+          <div><div class="page-title">回饋總覽</div><div class="page-desc">訂單視角的回饋數據分析。</div></div>
+          <button class="btn sm">↓ 匯出</button>
+        </div>
+        <div class="filter-bar" id="timeFilter">
+          <label>時間區間</label>
+          <select><option>近 14 天（預設）</option><option>近 30 天</option><option>近 90 天</option><option>自訂區間</option></select>
+          <span class="date-hint">2026/05/17 – 2026/05/31</span>
+          <button class="btn sm" style="margin-left:auto">套用</button>
+        </div>
+        <div class="placeholder">KPI 卡片 × 4（示意）</div>
+        <div class="placeholder">折線圖、分佈卡（示意）</div>
+      </div>
+
+      <!-- 回饋活動 -->
+      <div class="view show" id="vCp">
+        <div class="page-head">
+          <div><div class="page-title">回饋活動</div><div class="page-desc">建立與管理回饋活動，系統自動為每筆訂單套用最高回饋。</div></div>
+          <button class="btn primary" id="addBtn">＋ 新增回饋活動</button>
+        </div>
+        <div class="placeholder">活動列表（示意）</div>
+      </div>
+
+      <!-- 點數管理 -->
+      <div class="view" id="vPt">
+        <div class="page-head"><div><div class="page-title">點數管理</div><div class="page-desc">查詢發放記錄、分析點數、管理餘額與設定。</div></div></div>
+        <div class="tabs">
+          <div class="tab active" id="tabDetail" onclick="goTab('detail')">發放明細</div>
+          <div class="tab" id="tabAnal" onclick="goTab('anal')">點數分析</div>
+          <div class="tab" id="tabSet" onclick="goTab('set')">餘額與設定</div>
+        </div>
+        <div id="tcDetail"><div class="placeholder">每筆符合回饋資格的訂單發放狀態（示意）</div></div>
+        <div id="tcAnal" style="display:none"><div class="placeholder">點數發放趨勢、KPI 分析（示意）</div></div>
+        <div id="tcSet" style="display:none"><div class="placeholder">儲值餘額、通知偏好、全站設定（示意）</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETUP MODAL ══ -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-hd">
+      <div class="step-track">
+        <div class="s-pip active" id="pip1">1</div>
+        <div class="s-conn" id="conn"></div>
+        <div class="s-pip" id="pip2">2</div>
+      </div>
+      <div class="modal-title" id="mTitle">發點規則設定</div>
+      <div class="modal-sub" id="mSub">設定點數何時發送給消費者，以及發放管道。完成後可在「餘額與設定」調整。</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="modal-bd" id="s1">
+
+      <!-- 發點基準 -->
+      <div class="field">
+        <div class="field-label">發點基準 <span class="req">*</span></div>
+        <select class="sel" id="fTrigger" onchange="v1()">
+          <option value="">請選擇</option>
+          <option value="a">訂單狀態已完成</option>
+          <option value="b">送貨狀態已到達</option>
+          <option value="c">送貨狀態已取貨</option>
+        </select>
+        <div class="hint">符合回饋資格的訂單達到所選狀態時，系統開始計算發點日期</div>
+        <div class="err" id="eTrigger">請選擇發點基準</div>
+      </div>
+
+      <!-- 延遲天數 -->
+      <div class="field">
+        <div class="field-label">延遲天數 <span class="req">*</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="input" type="number" id="fDelay" min="0" value="0" style="width:96px" oninput="v1()"> <span style="font-size:13px;color:var(--text-2)">天</span>
+        </div>
+        <div class="hint">達到發點基準後，額外等待 N 天再寄送領點連結（填 0 不延遲）</div>
+        <div class="err" id="eDelay">請輸入 0 以上整數</div>
+      </div>
+
+      <!-- 發放管道 -->
+      <div class="field">
+        <div class="field-label">領點連結發放管道 <span class="req">*</span></div>
+        <div class="ch-list">
+          <div class="ch-row" id="chEmail">
+            <div class="ch-head" onclick="toggleCh('email')">
+              <input class="ch-cb" type="checkbox" id="cbEmail" onclick="event.stopPropagation();toggleCh('email')"> <span class="ch-name">SHOPLINE Email 系統</span>
+            </div>
+          </div>
+          <div class="ch-row" id="chLine">
+            <div class="ch-head" onclick="toggleCh('line')">
+              <input class="ch-cb" type="checkbox" id="cbLine" onclick="event.stopPropagation();toggleCh('line')"> <span class="ch-name">LINE Official Account</span>
+            </div>
+            <div class="ch-body">
+              <label>LINE Channel Access Token <span style="color:var(--danger)">*</span></label>
+              <input class="input" id="fToken" type="text" placeholder="貼上 Channel Access Token" oninput="v1()">
+              <div class="hint">於 LINE Developers Console 取得。啟用後超出 LINE OA 免費訊息額度的部分，由 LINE 向商家直接收費，與本服務無關。</div>
+            </div>
+          </div>
+        </div>
+        <div class="err" id="eCh">請至少選擇一個發放管道</div>
+      </div>
+
+      <!-- 寄送時間 -->
+      <div class="field">
+        <div class="field-label">領點連結寄送時間 <span class="req">*</span></div>
+        <div class="time-wrap">
+          <input class="t-num" type="number" id="tH" min="1" max="12" placeholder="HH" oninput="clampH();v1()">
+          <span class="t-sep">:</span>
+          <input class="t-num" type="number" id="tM" min="0" max="59" placeholder="MM" oninput="clampM();v1()">
+          <select class="t-ampm" id="tAP" onchange="v1()">
+            <option value="">AM/PM</option>
+            <option>AM</option><option>PM</option>
+          </select>
+        </div>
+        <div class="hint">每日自動寄送領點連結給符合發點條件的訂單</div>
+        <div class="err" id="eTime">請完整填寫寄送時間</div>
+      </div>
+
+      <!-- 回饋上限 -->
+      <div class="field">
+        <div class="field-label">單一訂單回饋上限 <span class="req">*</span></div>
+        <div class="limit-row">
+          <label class="lopt"><input type="radio" name="lm" value="none" checked onchange="setLm('none')"> 不設上限</label>
+          <label class="lopt">
+            <input type="radio" name="lm" value="set" onchange="setLm('set')"> 設定上限
+            <div class="limit-inline" id="lInline">
+              <input class="input" type="number" id="fLimit" min="1" placeholder="點數" oninput="v1()">
+              <span class="unit">點 / 筆</span>
+            </div>
+          </label>
+        </div>
+        <div class="hint">每筆訂單可獲得的最高點數，超出此值將截斷</div>
+        <div class="err" id="eLimit">請輸入正整數</div>
+      </div>
+
+      <!-- 效期（唯讀） -->
+      <div class="field">
+        <div class="field-label">領點連結效期</div>
+        <div class="readonly-field"><span class="rv">60 天</span><span class="rs">固定值，不可調整</span></div>
+        <div class="hint">系統發送連結後，消費者須於 60 天內點擊連結完成領取</div>
+      </div>
+
+    </div>
+
+    <!-- Step 2 -->
+    <div style="display:none" id="s2">
+      <div class="notice blue">
+        <span class="ni">ℹ️</span>
+        <p><strong>關於預支點數機制</strong>當點數餘額不足時，系統仍會自動為符合回饋資格的訂單完成點數發放（預支）。預支點數將於每月 1 日結算，帳單寄出後 7 個工作日內付款。建議定期確認餘額充足，避免累積預支費用。</p>
+      </div>
+      <div class="modal-bd">
+
+        <!-- 帳務信箱 -->
+        <div class="field">
+          <div class="field-label">帳務通知信箱 <span class="req">*</span></div>
+          <input class="input" type="email" id="fBill" placeholder="example@company.com" oninput="v2()">
+          <div class="hint">月結帳單與付款提醒將寄送至此信箱</div>
+          <div class="err" id="eBill">請輸入有效的 Email</div>
+        </div>
+
+        <!-- 通知門檻 -->
+        <div class="field">
+          <div class="field-label">用罄通知門檻</div>
+          <div class="notif-rows">
+            <div class="notif-row">
+              <div class="nl">活動預算即將用罄<small>使用達 X% 時發送通知</small></div>
+              <input class="input" type="number" id="fBudget" value="90" min="1" max="99" oninput="v2()">
+              <span class="unit">%</span>
+            </div>
+            <div class="notif-row">
+              <div class="nl">儲值點數即將用罄<small>使用達 X% 時發送通知（強制啟用）</small></div>
+              <input class="input" type="number" id="fBalance" value="80" min="1" max="99" oninput="v2()">
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 通知信箱 -->
+        <div class="field">
+          <div class="field-label">即將用罄通知信箱</div>
+          <input class="input" type="email" id="fNotif" placeholder="不填則同帳務信箱">
+          <div class="hint">預算或點數餘額達門檻時，通知寄送至此信箱</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-ft">
+      <button class="btn ghost" id="backBtn" style="display:none" onclick="toStep(1)">← 上一步</button>
+      <button class="btn primary" id="mainBtn" onclick="nextStep()" disabled>下一步 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TUTORIAL ══ -->
+<div class="tut" id="tut">
+  <div class="tut-bg"></div>
+  <div class="spotlight" id="spot"></div>
+  <div class="tut-card" id="tutCard">
+    <div class="tut-step" id="tutStep"></div>
+    <h4 id="tutTitle"></h4>
+    <p id="tutBody"></p>
+    <div class="tut-arrow" id="tutArr"></div>
+    <div class="tut-foot">
+      <div class="tut-dots" id="tutDots"></div>
+      <div class="tut-btns">
+        <button class="tut-skip" onclick="endTut()">跳過引導</button>
+        <button class="tut-back" id="tutBack" onclick="moveTut(-1)">← 上一步</button>
+        <button class="tut-next" id="tutNext" onclick="moveTut(1)">下一步 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── View / Tab switching ───────────────────────
+const views = {ov:'回饋總覽', cp:'回饋活動', pt:'點數管理'};
+function go(k){
+  Object.keys(views).forEach(v=>{
+    document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('show', v===k);
+    document.getElementById('nav'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('active', v===k);
+  });
+  document.getElementById('bcHere').textContent = views[k];
+  document.getElementById('subTabs').style.display = k==='pt' ? 'block' : 'none';
+}
+function goTab(t){
+  ['detail','anal','set'].forEach(x=>{
+    document.getElementById('tc'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = x===t?'block':'none';
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===t);
+    const sn = document.getElementById('st'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(sn) sn.classList.toggle('active', x===t);
+  });
+}
+
+// ─── Modal step state ──────────────────────────
+let step = 1;
+let lm = 'none';
+let emailOn = false, lineOn = false;
+
+function toStep(n){
+  step = n;
+  const s1 = document.getElementById('s1');
+  const s2 = document.getElementById('s2');
+  const back = document.getElementById('backBtn');
+  const main = document.getElementById('mainBtn');
+  const p1 = document.getElementById('pip1'), p2 = document.getElementById('pip2'), conn = document.getElementById('conn');
+
+  if(n===1){
+    s1.style.display='block'; s2.style.display='none';
+    back.style.display='none';
+    document.getElementById('mTitle').textContent='發點規則設定';
+    document.getElementById('mSub').textContent='設定點數何時發送給消費者，以及發放管道。完成後可在「餘額與設定」調整。';
+    p1.className='s-pip active'; p2.className='s-pip'; conn.className='s-conn';
+    main.textContent='下一步 →'; main.disabled=true;
+    v1();
+  } else {
+    s1.style.display='none'; s2.style.display='block';
+    back.style.display='inline-flex';
+    document.getElementById('mTitle').textContent='帳務與通知設定';
+    document.getElementById('mSub').textContent='設定帳務通知信箱與點數用罄提醒。';
+    p1.className='s-pip done'; p2.className='s-pip active'; conn.className='s-conn done';
+    main.textContent='完成設定，進入後台'; main.disabled=true;
+    v2();
+  }
+}
+
+function nextStep(){
+  if(step===1){
+    // show errors
+    let ok = runValidate1();
+    if(ok) toStep(2);
+  } else {
+    let ok = runValidate2();
+    if(ok){ document.getElementById('overlay').style.display='none'; startTut(); }
+  }
+}
+
+// ─── Step 1 validation ────────────────────────
+function clampH(){ const e=document.getElementById('tH'); if(+e.value>12)e.value=12; if(+e.value<1&&e.value!=='')e.value=1; }
+function clampM(){ const e=document.getElementById('tM'); if(+e.value>59)e.value=59; if(+e.value<0)e.value=0; }
+
+function setLm(m){
+  lm=m;
+  document.getElementById('lInline').classList.toggle('on', m==='set');
+  if(m==='none') document.getElementById('eLimit').classList.remove('on');
+  v1();
+}
+
+function toggleCh(t){
+  if(t==='email'){
+    emailOn=!emailOn;
+    document.getElementById('cbEmail').checked=emailOn;
+    document.getElementById('chEmail').classList.toggle('on', emailOn);
+  } else {
+    lineOn=!lineOn;
+    document.getElementById('cbLine').checked=lineOn;
+    document.getElementById('chLine').classList.toggle('on', lineOn);
+  }
+  v1();
+}
+
+function v1(){
+  // live-enable the button without showing errors
+  const tr=document.getElementById('fTrigger').value;
+  const dy=document.getElementById('fDelay').value;
+  const dyOk=dy!==''&&Number.isInteger(+dy)&&+dy>=0;
+  const chOk=emailOn||lineOn;
+  const tkOk=!lineOn||document.getElementById('fToken').value.trim()!=='';
+  const h=document.getElementById('tH').value, m=document.getElementById('tM').value, ap=document.getElementById('tAP').value;
+  const tmOk=h&&m!==''&&ap;
+  const limOk=lm==='none'||(document.getElementById('fLimit').value!==''&&+document.getElementById('fLimit').value>0);
+  document.getElementById('mainBtn').disabled=!(tr&&dyOk&&chOk&&tkOk&&tmOk&&limOk);
+}
+
+function runValidate1(){
+  let ok=true;
+  // trigger
+  const tr=document.getElementById('fTrigger').value;
+  document.getElementById('eTrigger').classList.toggle('on',!tr);
+  document.getElementById('fTrigger').classList.toggle('bad',!tr);
+  if(!tr)ok=false;
+  // delay
+  const dy=document.getElementById('fDelay').value;
+  const dyOk=dy!==''&&Number.isInteger(+dy)&&+dy>=0;
+  document.getElementById('eDelay').classList.toggle('on',!dyOk);
+  document.getElementById('fDelay').classList.toggle('bad',!dyOk);
+  if(!dyOk)ok=false;
+  // channel
+  const chOk=emailOn||lineOn;
+  document.getElementById('eCh').classList.toggle('on',!chOk);
+  if(!chOk)ok=false;
+  // line token
+  if(lineOn){const tk=document.getElementById('fToken').value.trim();if(!tk){document.getElementById('fToken').classList.add('bad');ok=false;}else{document.getElementById('fToken').classList.remove('bad');}}
+  // time
+  const h=document.getElementById('tH').value,m=document.getElementById('tM').value,ap=document.getElementById('tAP').value;
+  const tmOk=h&&m!==''&&ap;
+  document.getElementById('eTime').classList.toggle('on',!tmOk);
+  [document.getElementById('tH'),document.getElementById('tM'),document.getElementById('tAP')].forEach(e=>e.classList.toggle('bad',!tmOk));
+  if(!tmOk)ok=false;
+  // limit
+  if(lm==='set'){const lv=document.getElementById('fLimit').value;const lvOk=lv!==''&&+lv>0;document.getElementById('eLimit').classList.toggle('on',!lvOk);document.getElementById('fLimit').classList.toggle('bad',!lvOk);if(!lvOk)ok=false;}
+  // scroll to first error
+  if(!ok){const firstErr=document.querySelector('#s1 .err.on');if(firstErr)firstErr.scrollIntoView({block:'center',behavior:'smooth'});}
+  return ok;
+}
+
+// ─── Step 2 validation ────────────────────────
+function v2(){
+  const bill=document.getElementById('fBill').value;
+  const billOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bill);
+  const bt=document.getElementById('fBudget').value;
+  const blt=document.getElementById('fBalance').value;
+  const thOk=bt&&+bt>0&&+bt<100&&blt&&+blt>0&&+blt<100;
+  document.getElementById('mainBtn').disabled=!(billOk&&thOk);
+}
+function runValidate2(){
+  let ok=true;
+  const bill=document.getElementById('fBill').value;
+  const billOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bill);
+  document.getElementById('eBill').classList.toggle('on',!billOk);
+  document.getElementById('fBill').classList.toggle('bad',!billOk);
+  if(!billOk)ok=false;
+  return ok;
+}
+
+// ─── Tutorial ─────────────────────────────────
+const STEPS=[
+  {label:'1 / 6',title:'後台三個主要頁面',
+   body:'點數回饋後台分為三個頁面：<b>回饋總覽</b>（數據分析）、<b>回饋活動</b>（建立管理活動）、<b>點數管理</b>（發放記錄、分析、餘額設定）。',
+   tid:'navSub', side:'right', view:null, tab:null},
+  {label:'2 / 6',title:'回饋總覽：時間篩選',
+   body:'這裡顯示訂單回饋數據分析，<b>預設顯示近 14 天</b>。可切換區間（近 30 天、近 90 天或自訂），套用後可使用右上角「匯出」下載報表。',
+   tid:'timeFilter', side:'below', view:'ov', tab:null},
+  {label:'3 / 6',title:'回饋活動：新增活動',
+   body:'點擊「＋ 新增回饋活動」建立第一個活動。設定回饋條件、方式與預算後，系統自動為每筆訂單選擇最高回饋。',
+   tid:'addBtn', side:'below', view:'cp', tab:null},
+  {label:'4 / 6',title:'點數管理：發放明細',
+   body:'每筆符合回饋資格的訂單都記錄在這裡，可查詢<b>待發送、已發送、領取狀態</b>，並點擊單筆查看完整訂單詳情。',
+   tid:'tabDetail', side:'above', view:'pt', tab:'detail'},
+  {label:'5 / 6',title:'點數管理：點數分析',
+   body:'查看點數<b>發放趨勢、領取率</b>與活動效益比較，以 KPI 卡片與圖表呈現，協助評估活動成效。',
+   tid:'tabAnal', side:'above', view:'pt', tab:'anal'},
+  {label:'6 / 6',title:'點數管理：餘額與設定',
+   body:'在這裡<b>申請儲值點數</b>，並隨時調整基本設定（發點基準、延遲天數、通知偏好等）。',
+   tid:'tabSet', side:'above', view:'pt', tab:'set'},
+];
+
+let ti=0;
+function startTut(){ ti=0; document.getElementById('tut').classList.add('on'); renderTut(); }
+function restartTut(){ document.getElementById('helpMenu').classList.remove('open'); startTut(); }
+function endTut(){ document.getElementById('tut').classList.remove('on'); go('cp'); }
+
+function moveTut(d){
+  const nx=ti+d;
+  if(nx<0||nx>=STEPS.length){if(nx>=STEPS.length)endTut();return;}
+  ti=nx; renderTut();
+}
+
+function renderTut(){
+  const s=STEPS[ti];
+  if(s.view) go(s.view);
+  if(s.tab) goTab(s.tab);
+  document.getElementById('tutStep').textContent='第 '+s.label+' 步';
+  document.getElementById('tutTitle').textContent=s.title;
+  document.getElementById('tutBody').innerHTML=s.body;
+  document.getElementById('tutBack').style.display=ti===0?'none':'inline-flex';
+  document.getElementById('tutNext').textContent=ti===STEPS.length-1?'完成 ✓':'下一步 →';
+  document.getElementById('tutDots').innerHTML=STEPS.map((_,i)=>`<span class="${i===ti?'on':''}"></span>`).join('');
+
+  requestAnimationFrame(()=>{
+    const el=document.getElementById(s.tid);
+    if(!el){document.getElementById('spot').style.display='none';return;}
+    document.getElementById('spot').style.display='';
+    const r=el.getBoundingClientRect(), pad=5;
+    const sp=document.getElementById('spot');
+    sp.style.left=(r.left-pad)+'px'; sp.style.top=(r.top-pad)+'px';
+    sp.style.width=(r.width+pad*2)+'px'; sp.style.height=(r.height+pad*2)+'px';
+
+    const tc=document.getElementById('tutCard');
+    const arr=document.getElementById('tutArr');
+    arr.className='tut-arrow';
+    const TW=300, gap=14;
+    if(s.side==='right'){
+      tc.style.cssText=`left:${r.right+gap}px;top:${Math.max(8,r.top)}px;transform:none`;
+      arr.classList.add('arr-left');
+    } else if(s.side==='below'){
+      let lx=r.left; if(lx+TW>window.innerWidth-12)lx=window.innerWidth-TW-12;
+      tc.style.cssText=`left:${lx}px;top:${r.bottom+gap}px;transform:none`;
+      arr.classList.add('arr-top');
+    } else { // above
+      let lx=r.left; if(lx+TW>window.innerWidth-12)lx=window.innerWidth-TW-12;
+      tc.style.cssText=`left:${lx}px;top:${r.top-200-gap}px;transform:none`;
+      arr.classList.add('arr-bottom');
+    }
+  });
+}
+
+// ─── Help menu ─────────────────────────────────
+document.getElementById('helpBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpMenu').classList.toggle('open');});
+document.addEventListener('click',()=>document.getElementById('helpMenu').classList.remove('open'));
+window.addEventListener('resize',()=>{if(document.getElementById('tut').classList.contains('on'))renderTut();});
+
+// ─── Init ──────────────────────────────────────
+toStep(1);
+</script>
+</body>
+</html>
