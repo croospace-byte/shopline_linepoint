@@ -2,271 +2,566 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>首次開啟流程 Prototype v3｜點數回饋</title>
+<title>首次開啟流程 Prototype v4｜點數回饋</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{
-  --primary:#1875F0;--primary-hover:#0F65D8;
-  --sidebar-bg:#1F2937;--sidebar-hover:#374151;--sidebar-text:#D1D5DB;
-  --page-bg:#F5F7FA;
-  --border:#E5E7EB;--text-1:#111827;--text-2:#4B5563;--text-3:#9CA3AF;
-  --success:#16A34A;--danger:#DC2626;
+  --primary:#1875F0;--primary-h:#0F65D8;
+  --sb:#1a2332;--sbh:#263348;--sbt:#c9d0db;
+  --border:#E5E7EB;--bg:#F5F7FA;
+  --t1:#111827;--t2:#4B5563;--t3:#9CA3AF;
+  --green:#16A34A;--yellow:#B45309;--red:#DC2626;--orange:#EA580C;
+  --sh:0 1px 3px rgba(0,0,0,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text-1);background:var(--page-bg);font-size:14px;line-height:1.5}
-button{font-family:inherit;cursor:pointer}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:13px;color:var(--t1);background:var(--bg)}
+button,select,input{font-family:inherit;font-size:13px}
 
 /* ── Layout ── */
 .app{display:flex;min-height:100vh}
-.sidebar{width:220px;background:var(--sidebar-bg);flex-shrink:0;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
-.main-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{height:52px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:5}
-.content{flex:1;padding:24px}
+.sb{width:196px;background:var(--sb);flex-shrink:0;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:48px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;justify-content:space-between;position:sticky;top:0;z-index:5}
+.app-bar{background:#1a2332;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.app-bar .dot{width:7px;height:7px;background:#3B82F6;border-radius:50%;display:inline-block;margin-right:6px}
+.app-bar .left{color:#9CB3D0;display:flex;align-items:center}
+.app-bar .doc{color:#60A5FA;cursor:pointer;font-size:12px}
+.content{flex:1;padding:20px 24px;overflow:auto}
 
-/* ── Sidebar ── */
-.brand{padding:14px 18px;font-weight:700;font-size:16px;color:#fff;border-bottom:1px solid #374151;display:flex;align-items:center;gap:8px}
-.brand-logo{width:22px;height:22px;background:var(--primary);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800}
-.nav-section{padding:10px 18px 4px;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:8px;padding:8px 18px;color:var(--sidebar-text);font-size:13px;cursor:pointer;border-left:3px solid transparent}
-.nav-item:hover{background:var(--sidebar-hover);color:#fff}
-.nav-item.dim{opacity:.4;pointer-events:none}
-.nav-item.active{background:var(--sidebar-hover);color:#fff;border-left-color:var(--primary)}
-.nav-group{background:#111827;display:flex;align-items:center;gap:8px;padding:8px 18px;color:#fff;font-size:13px;font-weight:600}
-.nav-sub .nav-item{padding-left:40px}
-.nav-subtab .nav-item{padding-left:52px;font-size:12px}
+/* Sidebar */
+.brand{padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #263348}
+.brand-logo{width:20px;height:20px;background:var(--primary);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.brand span{color:#fff;font-weight:700;font-size:15px}
+.ns{padding:9px 16px 3px;font-size:10px;color:#5a6a80;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.ni{display:flex;align-items:center;gap:7px;padding:7px 16px;color:var(--sbt);font-size:12px;cursor:pointer;border-left:2px solid transparent;transition:all .12s}
+.ni:hover{background:var(--sbh);color:#fff}
+.ni.dim{opacity:.38;pointer-events:none}
+.ni.active{background:var(--sbh);color:#fff;border-left-color:var(--primary)}
+.ng{display:flex;align-items:center;gap:7px;padding:7px 16px;color:#fff;font-size:12px;font-weight:600;background:#111c2b;cursor:pointer}
+.ng .badge{margin-left:auto;background:#1875F0;color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px}
+.nsub .ni{padding-left:32px;font-size:12px}
+.nsubtab .ni{padding-left:44px;font-size:11px}
 
-/* ── Topbar ── */
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
-.breadcrumb .here{color:var(--text-1);font-weight:600}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.shop-name{font-size:13px;color:var(--text-2)}
-.shop-name strong{color:var(--text-1)}
-.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1875F0,#7E5EE5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
-.help-wrap{position:relative}
-.help-btn{width:28px;height:28px;border-radius:50%;background:#F3F4F6;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#4B5563;cursor:pointer}
-.help-btn:hover{background:#E5E7EB}
-.help-menu{position:absolute;top:calc(100% + 8px);right:0;width:196px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:200}
-.help-menu.open{display:block}
-.help-menu a{display:flex;align-items:center;gap:8px;padding:11px 16px;font-size:13px;color:var(--text-1);text-decoration:none;border-bottom:1px solid var(--border);cursor:pointer}
-.help-menu a:last-child{border-bottom:none}
-.help-menu a:hover{background:#F9FAFB}
+/* Topbar */
+.bc{display:flex;align-items:center;gap:5px;color:var(--t2);font-size:12px}
+.bc b{color:var(--t1);font-weight:600}
+.tr{display:flex;align-items:center;gap:10px}
+.shop{font-size:12px;color:var(--t2)}
+.shop b{color:var(--t1)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1875F0,#7E5EE5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.bell{font-size:16px;color:var(--t2);cursor:pointer}
+.hw{position:relative}
+.hb{width:26px;height:26px;border-radius:50%;background:#F3F4F6;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer}
+.hb:hover{background:#E5E7EB}
+.hm{position:absolute;top:calc(100%+6px);right:0;width:186px;background:#fff;border:1px solid var(--border);border-radius:7px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:200}
+.hm.open{display:block}
+.hm a{display:flex;align-items:center;gap:7px;padding:10px 14px;color:var(--t1);text-decoration:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px}
+.hm a:last-child{border-bottom:none}
+.hm a:hover{background:#F9FAFB}
 
-/* ── Views ── */
+/* Views */
 .view{display:none}
 .view.show{display:block}
-.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
-.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
-.page-desc{font-size:13px;color:var(--text-2)}
-.placeholder{height:140px;background:#fff;border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;margin-bottom:16px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text-1);cursor:pointer;transition:background .15s}
+
+/* Page header */
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.pt{font-size:19px;font-weight:700;margin-bottom:3px}
+.pd{font-size:12px;color:var(--t2)}
+.ts{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
+.ts .dot{width:7px;height:7px;background:#16A34A;border-radius:50%}
+
+/* Date range pill */
+.dr{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:var(--t1)}
+.dr:hover{background:#F9FAFB}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--t1);cursor:pointer}
 .btn:hover{background:#F9FAFB}
 .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
-.btn.primary:hover{background:var(--primary-hover)}
-.btn.primary:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
-.btn.ghost{background:transparent;border:none;color:var(--text-2)}
-.btn.sm{padding:6px 12px;font-size:12px}
-.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
-.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent}
-.tab:hover{color:var(--text-1)}
+.btn.primary:hover{background:var(--primary-h)}
+.btn.primary:disabled{opacity:.4;pointer-events:none}
+.btn.sm{padding:5px 10px;font-size:11px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--t2)}
+
+/* Card */
+.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;box-shadow:var(--sh);margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:14px}
+
+/* Tabs */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent}
+.tab:hover{color:var(--t1)}
 .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-.filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.filter-bar label{font-size:12px;font-weight:600;color:var(--text-2);white-space:nowrap}
-.filter-bar select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:#fff}
-.filter-bar .date-hint{font-size:12px;color:var(--text-3)}
 
-/* ── Modal overlay ── */
-.overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+/* Filter bar */
+.fb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.fb label{font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap}
+.fb select,.fb input[type=text],.fb input[type=date]{padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;background:#fff;color:var(--t1)}
+.fb .spacer{margin-left:auto}
+
+/* Table */
+.tbl-wrap{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--sh);margin-bottom:14px}
+table{width:100%;border-collapse:collapse}
+th{background:#F9FAFB;padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFC}
+
+/* Badges */
+.bdg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.bdg.green{background:#DCFCE7;color:#16A34A}
+.bdg.yellow{background:#FEF3C7;color:#B45309}
+.bdg.gray{background:#F3F4F6;color:#6B7280}
+.bdg.blue{background:#DBEAFE;color:#1D4ED8}
+.bdg.red{background:#FEE2E2;color:#B91C1C}
+
+/* Toggle */
+.tog{position:relative;display:inline-block;width:34px;height:18px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog .sl{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:18px;transition:.2s}
+.tog .sl::before{content:"";position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tog input:checked+.sl{background:var(--primary)}
+.tog input:checked+.sl::before{transform:translateX(16px)}
+
+/* Progress bar */
+.pgr{min-width:140px}
+.pgr-track{height:14px;background:#F3F4F6;border-radius:7px;overflow:hidden;margin-bottom:3px}
+.pgr-fill{height:100%;border-radius:7px}
+.pgr-fill.blue{background:linear-gradient(90deg,#3B82F6,#1875F0)}
+.pgr-fill.orange{background:linear-gradient(90deg,#F59E0B,#EA580C)}
+.pgr-fill.red{background:linear-gradient(90deg,#EF4444,#DC2626)}
+.pgr-txt{font-size:10px;color:var(--t2)}
+
+/* KPI cards */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:var(--sh)}
+.kpi .kl{font-size:11px;color:var(--t2);margin-bottom:6px}
+.kpi .kv{font-size:22px;font-weight:700}
+.kpi .kd{font-size:11px;margin-top:4px}
+.kpi .kd.up{color:var(--green)}
+.kpi .kd.dn{color:var(--red)}
+.kpi .ks{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* Chart placeholder */
+.chart{height:120px;display:flex;align-items:flex-end;gap:4px;padding:8px 0 0;border-top:1px dashed var(--border);margin-top:8px}
+.bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;opacity:.85}
+.bar.cur{background:#1875F0}
+.bar.hist{background:#D1D5DB}
+.chart-labels{display:flex;gap:4px;padding-top:4px}
+.chart-labels span{flex:1;text-align:center;font-size:10px;color:var(--t3)}
+
+/* Two-column layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+
+/* Balance cards */
+.bal-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.bal{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;box-shadow:var(--sh)}
+.bal.highlight{border-color:var(--primary);background:#EFF6FF}
+.bal .bl{font-size:11px;color:var(--t2);margin-bottom:6px}
+.bal .bv{font-size:24px;font-weight:700;margin-bottom:4px}
+.bal .bv.primary{color:var(--primary)}
+.bal .bs{font-size:11px;color:var(--t3)}
+
+/* Settings section */
+.sec{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.sec-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sec-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.sec-row:last-child{border-bottom:none}
+.sec-row .sk{color:var(--t2)}
+.sec-row .sv{color:var(--t1);font-weight:500}
+
+/* Analysis card (split layout) */
+.anal-card{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--sh);margin-bottom:14px}
+.anal-inner{display:grid;grid-template-columns:220px 1fr;min-height:200px}
+.anal-left{padding:16px;border-right:1px solid var(--border)}
+.anal-right{padding:16px}
+.anal-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.anal-row:last-child{border-bottom:none}
+.anal-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.anal-label{font-size:12px;color:var(--t2);flex:1}
+.anal-val{font-size:16px;font-weight:700}
+.anal-sub{font-size:11px;color:var(--t3)}
+
+/* Line chart mock */
+.lchart{height:160px;position:relative;border-bottom:1px solid var(--border)}
+.laxis{position:absolute;left:0;top:0;bottom:20px;display:flex;flex-direction:column;justify-content:space-between}
+.laxis span{font-size:10px;color:var(--t3)}
+svg.linechart{width:100%;height:100%}
+
+/* Distrib card */
+.distrib{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:var(--sh)}
+.distrib .dl{font-size:12px;font-weight:600;margin-bottom:10px}
+.dr-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.dr-name{font-size:11px;color:var(--t1);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-bar{flex:1;height:10px;background:#F3F4F6;border-radius:5px;overflow:hidden}
+.dr-fill{height:100%;background:linear-gradient(90deg,#3B82F6,#1875F0);border-radius:5px}
+.dr-val{font-size:11px;color:var(--t2);width:44px;text-align:right;flex-shrink:0}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(17,24,39,.58);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
 .overlay.hidden{display:none}
-.modal{background:#fff;border-radius:10px;width:572px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.22);overflow:hidden}
+.modal{background:#fff;border-radius:10px;width:564px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.22);overflow:hidden}
+.mhd{padding:16px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.step-track{display:flex;align-items:center;margin-bottom:12px}
+.spip{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t3);flex-shrink:0;transition:all .2s}
+.spip.active{border-color:var(--primary);color:var(--primary)}
+.spip.done{background:var(--primary);border-color:var(--primary);color:#fff}
+.sconn{height:2px;width:44px;background:var(--border);transition:background .2s}
+.sconn.done{background:var(--primary)}
+.mtitle{font-size:15px;font-weight:700}
+.msub{font-size:12px;color:var(--t2);margin-top:2px}
+.mnotice{padding:11px 22px;display:flex;gap:9px;flex-shrink:0}
+.mnotice.blue{background:#EFF6FF;border-bottom:1px solid #BFDBFE}
+.mnotice .ni2{font-size:14px;flex-shrink:0;margin-top:1px}
+.mnotice p{font-size:12px;line-height:1.65;color:#1E3A8A}
+.mnotice p b{display:block;font-weight:700;margin-bottom:1px}
+.mbd{padding:20px 22px;overflow-y:auto;flex:1}
+.mft{padding:12px 22px;border-top:1px solid var(--border);background:#FAFBFC;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 
-/* Modal header */
-.modal-hd{padding:18px 22px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.step-track{display:flex;align-items:center;margin-bottom:14px;gap:0}
-.s-pip{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-3);background:#fff;flex-shrink:0;transition:all .2s}
-.s-pip.active{border-color:var(--primary);color:var(--primary)}
-.s-pip.done{background:var(--primary);border-color:var(--primary);color:#fff}
-.s-conn{height:2px;width:48px;background:var(--border);transition:background .2s}
-.s-conn.done{background:var(--primary)}
-.modal-title{font-size:16px;font-weight:700;color:var(--text-1)}
-.modal-sub{font-size:12px;color:var(--text-2);margin-top:3px}
-
-/* Notice banner */
-.notice{padding:12px 22px;display:flex;gap:10px;flex-shrink:0}
-.notice.yellow{background:#FFFBEB;border-bottom:1px solid #FDE68A}
-.notice.blue{background:#EFF6FF;border-bottom:1px solid #BFDBFE}
-.notice .ni{font-size:15px;flex-shrink:0;margin-top:1px}
-.notice p{font-size:12px;line-height:1.7;color:#78350F}
-.notice.blue p{color:#1E3A8A}
-.notice p strong{display:block;font-weight:700;margin-bottom:1px}
-
-/* Modal body */
-.modal-bd{padding:22px;overflow-y:auto;flex:1}
-.field{margin-bottom:20px}
-.field-label{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:7px}
-.req{color:var(--danger);font-size:11px}
-.hint{font-size:12px;color:var(--text-3);margin-top:5px;line-height:1.5}
-.input,.sel{padding:9px 11px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;background:#fff;color:var(--text-1);width:100%}
-.input:focus,.sel:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
-.input.bad,.sel.bad{border-color:var(--danger)}
-.input:disabled{background:#F9FAFB;color:var(--text-3);cursor:not-allowed}
-.err{font-size:12px;color:var(--danger);margin-top:4px;display:none}
+/* Form */
+.field{margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+.fl{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.rq{color:var(--red);font-size:11px}
+.hint{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5}
+.inp,.sel{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#fff;color:var(--t1);width:100%}
+.inp:focus,.sel:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.inp.bad,.sel.bad{border-color:var(--red)}
+.inp:disabled{background:#F9FAFB;color:var(--t3);cursor:not-allowed}
+.err{font-size:11px;color:var(--red);margin-top:3px;display:none}
 .err.on{display:block}
-.readonly-field{padding:10px 14px;background:#F9FAFB;border:1px solid var(--border);border-radius:6px;display:flex;justify-content:space-between;align-items:center}
-.readonly-field .rv{font-size:13px;font-weight:600}
-.readonly-field .rs{font-size:12px;color:var(--text-3)}
+.rof{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:#F9FAFB;border:1px solid var(--border);border-radius:6px}
+.rof .rv{font-size:13px;font-weight:600}
+.rof .rs{font-size:11px;color:var(--t3)}
 
 /* Channel checkboxes */
-.ch-list{display:flex;flex-direction:column;gap:8px}
-.ch-row{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s}
-.ch-row.on{border-color:var(--primary)}
-.ch-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none}
-.ch-head:hover{background:#F8FAFF}
-.ch-row.on .ch-head{background:#EFF6FF}
-.ch-cb{width:15px;height:15px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
-.ch-name{font-size:13px;font-weight:500}
-.ch-body{display:none;padding:12px 14px 14px;background:#F8FBFF;border-top:1px solid #BFDBFE}
-.ch-row.on .ch-body{display:block}
-.ch-body label{font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:5px}
-.ch-body .input{font-family:monospace;font-size:12px}
-.ch-body .hint{font-size:11px;color:var(--text-3);margin-top:4px}
+.chlist{display:flex;flex-direction:column;gap:7px}
+.crow{border:1.5px solid var(--border);border-radius:7px;overflow:hidden;transition:border-color .15s}
+.crow.on{border-color:var(--primary)}
+.chead{display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;user-select:none}
+.chead:hover{background:#F8FAFF}
+.crow.on .chead{background:#EFF6FF}
+.ccb{width:14px;height:14px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
+.cname{font-size:13px;font-weight:500}
+.cbody{display:none;padding:11px 13px 13px;background:#F8FBFF;border-top:1px solid #BFDBFE}
+.crow.on .cbody{display:block}
+.cbody label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px}
+.cbody .inp{font-family:monospace;font-size:11px}
 
 /* Time picker */
-.time-wrap{display:flex;align-items:center;gap:6px}
-.t-num{width:62px;padding:9px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;text-align:center;font-family:inherit}
-.t-num:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
-.t-num.bad{border-color:var(--danger)}
-.t-sep{font-size:16px;font-weight:700;color:var(--text-2);line-height:1}
-.t-ampm{width:74px;padding:9px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit}
-.t-ampm:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
-.t-ampm.bad{border-color:var(--danger)}
+.tw{display:flex;align-items:center;gap:5px}
+.tn{width:58px;padding:8px 6px;border:1px solid var(--border);border-radius:6px;font-size:13px;text-align:center}
+.tn:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.tn.bad{border-color:var(--red)}
+.tsep{font-size:15px;font-weight:700;color:var(--t2)}
+.tap{width:70px;padding:8px 7px;border:1px solid var(--border);border-radius:6px;font-size:13px}
+.tap:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(24,117,240,.1)}
+.tap.bad{border-color:var(--red)}
 
-/* Inline limit */
-.limit-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.lopt{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;user-select:none}
-.lopt input{accent-color:var(--primary);width:14px;height:14px;cursor:pointer}
-.limit-inline{display:none;align-items:center;gap:6px}
-.limit-inline.on{display:flex}
-.limit-inline .input{width:106px}
-.limit-inline .unit{font-size:13px;color:var(--text-2);white-space:nowrap}
+/* Limit inline */
+.lrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.lopt{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;user-select:none}
+.lopt input{accent-color:var(--primary);width:13px;height:13px;cursor:pointer}
+.linl{display:none;align-items:center;gap:5px}
+.linl.on{display:flex}
+.linl .inp{width:96px}
+.linl .unit{font-size:12px;color:var(--t2);white-space:nowrap}
 
-/* Notification rows */
-.notif-rows{display:flex;flex-direction:column;gap:12px}
-.notif-row{display:flex;align-items:center;gap:10px}
-.notif-row .nl{flex:1;font-size:13px;color:var(--text-1)}
-.notif-row .nl small{display:block;font-size:11px;color:var(--text-3)}
-.notif-row .input{width:68px;text-align:center}
-.notif-row .unit{font-size:13px;color:var(--text-2);white-space:nowrap}
-
-/* Modal footer */
-.modal-ft{padding:14px 22px;border-top:1px solid var(--border);background:#FAFBFC;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+/* Notif rows */
+.nrows{display:flex;flex-direction:column;gap:10px}
+.nrow{display:flex;align-items:center;gap:10px}
+.nrow .nlabel{flex:1;font-size:13px}
+.nrow .nlabel small{display:block;font-size:11px;color:var(--t3)}
+.nrow .inp{width:64px;text-align:center}
+.nrow .unit{font-size:12px;color:var(--t2);white-space:nowrap}
 
 /* ── Tutorial ── */
 .tut{position:fixed;inset:0;z-index:80;display:none}
 .tut.on{display:block}
-.tut-bg{position:fixed;inset:0}
-.spotlight{position:fixed;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);transition:all .25s ease;z-index:82;pointer-events:none}
-.tut-card{position:fixed;width:300px;background:#fff;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:18px 20px 16px;z-index:83;transition:all .25s ease}
-.tut-step{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.tut-card h4{font-size:14px;font-weight:700;margin-bottom:7px}
-.tut-card p{font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:14px}
-.tut-foot{display:flex;align-items:center;justify-content:space-between}
-.tut-dots{display:flex;gap:5px}
-.tut-dots span{width:6px;height:6px;border-radius:50%;background:var(--border)}
-.tut-dots span.on{background:var(--primary)}
-.tut-btns{display:flex;align-items:center;gap:7px}
-.tut-skip{background:none;border:none;font-size:12px;color:var(--text-3);cursor:pointer;padding:4px 0}
-.tut-skip:hover{color:var(--text-2)}
-.tut-back,.tut-next{padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;border:none;cursor:pointer}
-.tut-back{background:#F3F4F6;color:var(--text-2)}
-.tut-back:hover{background:#E5E7EB}
-.tut-next{background:var(--primary);color:#fff}
-.tut-next:hover{background:var(--primary-hover)}
-.tut-arrow{position:absolute;width:0;height:0;pointer-events:none}
-.arr-top{border:8px solid transparent;border-bottom-color:#fff;top:-16px;left:22px}
-.arr-bottom{border:8px solid transparent;border-top-color:#fff;bottom:-16px;left:22px}
-.arr-left{border:8px solid transparent;border-right-color:#fff;left:-16px;top:18px}
+.spot{position:fixed;border-radius:7px;box-shadow:0 0 0 9999px rgba(0,0,0,.58);pointer-events:none;transition:all .22s ease;z-index:82}
+.tc{position:fixed;width:290px;background:#fff;border-radius:9px;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:16px 18px 14px;z-index:83;transition:all .22s ease}
+.tc .tstep{font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.tc h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.tc p{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px}
+.tfoot{display:flex;align-items:center;justify-content:space-between}
+.tdots{display:flex;gap:4px}
+.tdots span{width:5px;height:5px;border-radius:50%;background:var(--border)}
+.tdots span.on{background:var(--primary)}
+.tbtns{display:flex;align-items:center;gap:6px}
+.tskip{background:none;border:none;font-size:11px;color:var(--t3);cursor:pointer;padding:3px 0}
+.tskip:hover{color:var(--t2)}
+.tback,.tnext{padding:6px 11px;border-radius:5px;font-size:11px;font-weight:600;border:none;cursor:pointer}
+.tback{background:#F3F4F6;color:var(--t2)}
+.tback:hover{background:#E5E7EB}
+.tnext{background:var(--primary);color:#fff}
+.tnext:hover{background:var(--primary-h)}
+.tarr{position:absolute;width:0;height:0;pointer-events:none}
+.arr-t{border:7px solid transparent;border-bottom-color:#fff;top:-14px;left:20px}
+.arr-b{border:7px solid transparent;border-top-color:#fff;bottom:-14px;left:20px}
+.arr-l{border:7px solid transparent;border-right-color:#fff;left:-14px;top:16px}
 </style>
 </head>
 <body>
 
 <!-- ══ APP SHELL ══ -->
 <div class="app">
-  <div class="sidebar">
-    <div class="brand"><div class="brand-logo">S</div> SHOPLINE</div>
-    <div class="nav-section" style="margin-top:8px">商店管理</div>
-    <div class="nav-item dim">🛍 商品</div>
-    <div class="nav-item dim">📦 訂單</div>
-    <div class="nav-item dim">👥 顧客</div>
-    <div class="nav-section" style="margin-top:6px">行銷</div>
-    <div class="nav-item dim">🎁 優惠券</div>
-    <div class="nav-section" style="margin-top:6px">應用程式</div>
-    <div class="nav-group">⭐ 點數回饋 <span style="margin-left:auto;font-size:10px;background:rgba(255,255,255,.15);padding:1px 6px;border-radius:3px;font-weight:400">App</span></div>
-    <div class="nav-sub" id="navSub">
-      <div class="nav-item" id="navOv" onclick="go('ov')">回饋總覽</div>
-      <div class="nav-item active" id="navCp" onclick="go('cp')">回饋活動</div>
-      <div class="nav-item" id="navPt" onclick="go('pt')">點數管理</div>
+  <div class="sb">
+    <div class="brand"><div class="brand-logo">S</div><span>SHOPLINE</span></div>
+    <div class="ns" style="margin-top:8px">商店管理</div>
+    <div class="ni dim">🏪 商店概況</div>
+    <div class="ni dim">📦 商品管理</div>
+    <div class="ni dim">📋 訂單管理</div>
+    <div class="ni dim">👥 會員管理</div>
+    <div class="ni dim">📊 數據分析</div>
+    <div class="ns">行銷與工具</div>
+    <div class="ni dim">🎁 優惠及促銷</div>
+    <div class="ni dim">📢 行銷通知</div>
+    <div class="ns">應用程式</div>
+    <div class="ng" id="navApp">◆ 點數回饋 <span class="badge">12CM</span></div>
+    <div class="nsub" id="navSub">
+      <div class="ni" id="navOv" onclick="go('ov')">回饋總覽</div>
+      <div class="ni active" id="navCp" onclick="go('cp')">回饋活動</div>
+      <div class="ni" id="navPt" onclick="go('pt')">點數管理</div>
     </div>
-    <div class="nav-subtab" id="subTabs" style="display:none">
-      <div class="nav-item" id="stDetail" onclick="goTab('detail')">發放明細</div>
-      <div class="nav-item" id="stAnal" onclick="goTab('anal')">點數分析</div>
-      <div class="nav-item" id="stSet" onclick="goTab('set')">餘額與設定</div>
+    <div class="nsubtab" id="subTabs" style="display:none">
+      <div class="ni" id="stDetail" onclick="goTab('detail')">發放明細</div>
+      <div class="ni" id="stAnal" onclick="goTab('anal')">點數分析</div>
+      <div class="ni" id="stSet" onclick="goTab('set')">餘額與設定</div>
     </div>
+    <div class="ni dim" style="margin-top:6px">🧩 其他應用</div>
+    <div class="ns">系統設定</div>
+    <div class="ni dim">⚙️ 商店設定</div>
   </div>
 
-  <div class="main-wrap">
+  <div class="main">
     <div class="topbar">
-      <div class="breadcrumb">應用程式 › 點數回饋 › <span class="here" id="bcHere">回饋活動</span></div>
-      <div class="topbar-right">
-        <span class="shop-name">商店：<strong>12CM Official</strong></span>
-        <div class="help-wrap">
-          <div class="help-btn" id="helpBtn">？</div>
-          <div class="help-menu" id="helpMenu">
+      <div class="bc">應用程式 › 點數回饋 › <b id="bcH">回饋活動</b></div>
+      <div class="tr">
+        <span class="shop">商店：<b>艾瑪絲示範店</b></span>
+        <span class="bell">🔔</span>
+        <div class="hw">
+          <div class="hb" id="hBtn">？</div>
+          <div class="hm" id="hMenu">
             <a onclick="restartTut()">🎓 重新觀看引導</a>
             <a>📄 操作說明文件 ↗</a>
           </div>
         </div>
-        <div class="avatar">R</div>
+        <div class="av">R</div>
       </div>
+    </div>
+    <div class="app-bar">
+      <div class="left"><span class="dot"></span>您正在使用 12CM 點數回饋 應用程式｜版本 v1.0.0</div>
+      <div class="doc">說明文件 ↗</div>
     </div>
 
     <div class="content">
-      <!-- 回饋總覽 -->
+
+      <!-- ── 回饋總覽 ── -->
       <div class="view" id="vOv">
-        <div class="page-head">
-          <div><div class="page-title">回饋總覽</div><div class="page-desc">訂單視角的回饋數據分析。</div></div>
-          <button class="btn sm">↓ 匯出</button>
+        <div class="ph">
+          <div><div class="pt">回饋總覽</div><div class="pd">以訂單角度分析使用回饋活動的成效，包含成交訂單量、使用回饋訂單比例與客單價對比。</div></div>
+          <div id="ovTopActions" style="display:flex;align-items:center;gap:8px">
+            <div class="ts"><span class="dot"></span>資料截至 2026/05/26 11:45 AM</div>
+            <div class="dr" id="timeFilter">📅 2026/04/20 – 2026/05/19 ▾</div>
+            <button class="btn sm">↓ 匯出</button>
+          </div>
         </div>
-        <div class="filter-bar" id="timeFilter">
-          <label>時間區間</label>
-          <select><option>近 14 天（預設）</option><option>近 30 天</option><option>近 90 天</option><option>自訂區間</option></select>
-          <span class="date-hint">2026/05/17 – 2026/05/31</span>
-          <button class="btn sm" style="margin-left:auto">套用</button>
+        <!-- Analysis card -->
+        <div class="anal-card">
+          <div class="anal-inner">
+            <div class="anal-left">
+              <div style="font-size:12px;font-weight:600;margin-bottom:10px">回饋活動訂單分析</div>
+              <div class="anal-row"><span class="anal-dot" style="background:#1875F0"></span><span class="anal-label">成交訂單量</span></div>
+              <div style="font-size:20px;font-weight:700;padding:4px 0 2px 18px">1,247</div>
+              <div style="font-size:11px;color:var(--green);padding-left:18px;margin-bottom:10px">↑ 12.4%<span style="color:var(--t3);margin-left:4px">同期：1,108 筆</span></div>
+              <div class="anal-row"><span class="anal-dot" style="background:#1875F0"></span><span class="anal-label">使用回饋活動訂單</span></div>
+              <div style="font-size:20px;font-weight:700;padding:4px 0 2px 18px">384</div>
+              <div style="font-size:11px;color:var(--green);padding-left:18px;margin-bottom:10px">↑ 18.2%<span style="color:var(--t3);margin-left:4px">佔比 30.8%</span></div>
+              <div class="anal-row"><span class="anal-dot" style="background:#16A34A"></span><span class="anal-label">平均客單價</span></div>
+              <div style="font-size:14px;font-weight:700;padding:4px 0 2px 18px"><span style="color:var(--primary)">NT$ 1,595</span> 使用 / <span>NT$ 1,140</span> 未使用</div>
+              <div style="font-size:11px;color:var(--green);padding-left:18px">使用回饋之客單價 +39.9%</div>
+            </div>
+            <div class="anal-right">
+              <!-- Simple SVG line chart -->
+              <svg viewBox="0 0 440 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:150px">
+                <polyline points="20,120 60,105 100,95 140,100 180,88 220,92 260,85 300,90 340,80 380,75 420,65" fill="none" stroke="#16A34A" stroke-width="2.5"/>
+                <polyline points="20,135 60,128 100,122 140,125 180,118 220,115 260,120 300,112 340,108 380,105 420,95" fill="none" stroke="#1875F0" stroke-width="2.5"/>
+                <text x="20" y="148" font-size="9" fill="#9CA3AF">5/13</text><text x="100" y="148" font-size="9" fill="#9CA3AF">5/17</text><text x="200" y="148" font-size="9" fill="#9CA3AF">5/20</text><text x="300" y="148" font-size="9" fill="#9CA3AF">5/23</text><text x="400" y="148" font-size="9" fill="#9CA3AF">5/26</text>
+              </svg>
+              <div style="display:flex;gap:14px;font-size:11px;color:var(--t3);margin-top:4px;padding-left:4px">
+                <span><span style="color:#1875F0">━</span> 使用回饋訂單</span><span><span style="color:#16A34A">━</span> 未使用回饋訂單</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="placeholder">KPI 卡片 × 4（示意）</div>
-        <div class="placeholder">折線圖、分佈卡（示意）</div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="kl">使用回饋訂單佔比</div><div class="kv">30.8%</div><div class="kd up">↑ 1.5%</div></div>
+          <div class="kpi"><div class="kl">使用回饋訂單客單價</div><div class="kv" style="font-size:17px">NT$ 1,595</div><div class="kd up">↑ 39.9% vs 未使用</div></div>
+          <div class="kpi"><div class="kl">回饋會員回購率</div><div class="kv">42.3%</div><div class="ks">本期內 ≥ 2 次購買</div></div>
+          <div class="kpi"><div class="kl">活動 ROI</div><div class="kv">4.5x</div><div class="ks">營業額 / 點數成本</div></div>
+        </div>
+        <div class="two-col">
+          <div class="distrib"><div class="dl">各回饋活動訂單數</div>
+            <div class="dr-row"><span class="dr-name">聖誕禮品季 – 全站底</span><div class="dr-bar"><div class="dr-fill" style="width:82%"></div></div><span class="dr-val">128</span></div>
+            <div class="dr-row"><span class="dr-name">3C 加碼回饋</span><div class="dr-bar"><div class="dr-fill" style="width:64%"></div></div><span class="dr-val">98</span></div>
+            <div class="dr-row"><span class="dr-name">熱銷洗髮系列</span><div class="dr-bar"><div class="dr-fill" style="width:48%"></div></div><span class="dr-val">76</span></div>
+            <div class="dr-row"><span class="dr-name">夏日折扣加碼</span><div class="dr-bar"><div class="dr-fill" style="width:30%"></div></div><span class="dr-val">52</span></div>
+          </div>
+          <div class="distrib"><div class="dl">各回饋活動營業額</div>
+            <div class="dr-row"><span class="dr-name">3C 加碼回饋</span><div class="dr-bar"><div class="dr-fill" style="width:90%"></div></div><span class="dr-val">NT$245K</span></div>
+            <div class="dr-row"><span class="dr-name">聖誕禮品季 – 全站底</span><div class="dr-bar"><div class="dr-fill" style="width:60%"></div></div><span class="dr-val">NT$182K</span></div>
+            <div class="dr-row"><span class="dr-name">熱銷洗髮系列</span><div class="dr-bar"><div class="dr-fill" style="width:38%"></div></div><span class="dr-val">NT$108K</span></div>
+            <div class="dr-row"><span class="dr-name">夏日折扣加碼</span><div class="dr-bar"><div class="dr-fill" style="width:24%"></div></div><span class="dr-val">NT$78K</span></div>
+          </div>
+        </div>
       </div>
 
-      <!-- 回饋活動 -->
+      <!-- ── 回饋活動 ── -->
       <div class="view show" id="vCp">
-        <div class="page-head">
-          <div><div class="page-title">回饋活動</div><div class="page-desc">建立與管理回饋活動，系統自動為每筆訂單套用最高回饋。</div></div>
+        <div class="ph">
+          <div><div class="pt">回饋活動</div><div class="pd">設定點數回饋活動，系統將於符合鑑賞期條件的訂單（訂單完成日 / order/fully-fulfilled）每日 00:00 排程自動發放點數。</div></div>
           <button class="btn primary" id="addBtn">＋ 新增回饋活動</button>
         </div>
-        <div class="placeholder">活動列表（示意）</div>
+        <div class="fb">
+          <label>狀態</label><select style="width:100px"><option>全部</option><option>進行中</option><option>已排程</option><option>已結束</option><option>已停用</option></select>
+          <label>回饋條件</label><select style="width:100px"><option>全部</option><option>全站</option><option>指定分類</option><option>指定品項</option></select>
+          <label>關鍵字</label><input type="text" placeholder="搜尋活動名稱" style="width:160px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
+          <div class="spacer"></div>
+          <button class="btn sm">套用</button><button class="btn sm">清除</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>排序</th><th>活動名稱</th><th>回饋條件</th><th>回饋方式</th><th>預算額度</th><th>活動期間</th><th>狀態</th><th>啟用</th><th>操作</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>3</td><td><b>熱銷洗髮系列</b></td><td>指定品項<br><span style="color:var(--t3);font-size:11px">12 件商品</span></td><td>3% 比例</td><td><div class="pgr"><div class="pgr-track"><div class="pgr-fill blue" style="width:32%"></div></div><div class="pgr-txt">32% &nbsp;預估 645 / 2,000 點</div></div></td><td style="font-size:11px">2026/04/15 12:00 AM<br>~ 2026/07/15 11:59 PM</td><td><span class="bdg green">進行中</span></td><td><label class="tog"><input type="checkbox" checked><span class="sl"></span></label></td><td><a style="color:var(--primary);cursor:pointer;font-size:11px">編輯</a> <a style="color:var(--red);cursor:pointer;font-size:11px;margin-left:4px">刪除</a></td></tr>
+              <tr><td>4</td><td><b>新年福袋專案</b></td><td>指定品項<br><span style="color:var(--t3);font-size:11px">3 件商品</span></td><td>5% 比例</td><td><div class="pgr"><div class="pgr-track"><div class="pgr-fill blue" style="width:0%"></div></div><div class="pgr-txt">0% &nbsp;預估 0 / 1,500 點</div></div></td><td style="font-size:11px">2026/06/01 12:00 AM<br>~ 2026/06/15 11:59 PM</td><td><span class="bdg blue">已排程</span></td><td><label class="tog"><input type="checkbox" checked><span class="sl"></span></label></td><td><a style="color:var(--primary);cursor:pointer;font-size:11px">編輯</a> <a style="color:var(--red);cursor:pointer;font-size:11px;margin-left:4px">刪除</a></td></tr>
+              <tr><td>2</td><td><b>3C 加碼回饋</b></td><td>指定分類<br><span style="color:var(--t3);font-size:11px">3C 用品</span></td><td>4% 比例</td><td><div class="pgr"><div class="pgr-track"><div class="pgr-fill orange" style="width:94%"></div></div><div class="pgr-txt">94% &nbsp;預估 2,820 / 3,000 點</div></div></td><td style="font-size:11px">2026/05/10 12:00 AM<br>~ 2026/05/31 11:59 PM</td><td><span class="bdg green">進行中</span></td><td><label class="tog"><input type="checkbox" checked><span class="sl"></span></label></td><td><a style="color:var(--primary);cursor:pointer;font-size:11px">編輯</a> <a style="color:var(--red);cursor:pointer;font-size:11px;margin-left:4px">刪除</a></td></tr>
+              <tr><td>6</td><td><b>5月母親節加碼</b></td><td>指定分類<br><span style="color:var(--t3);font-size:11px">美妝保養</span></td><td>4% 比例</td><td><div class="pgr"><div class="pgr-track"><div class="pgr-fill red" style="width:96%"></div></div><div class="pgr-txt">96% &nbsp;預估 3,850 / 4,000 點</div></div></td><td style="font-size:11px">2026/05/01 12:00 AM<br>~ 2026/05/12 11:59 PM</td><td><span class="bdg gray">已結束</span></td><td><label class="tog"><input type="checkbox"><span class="sl"></span></label></td><td><a style="color:var(--primary);cursor:pointer;font-size:11px">編輯</a> <a style="color:var(--red);cursor:pointer;font-size:11px;margin-left:4px">刪除</a></td></tr>
+              <tr><td>1</td><td><b>聖誕禮品季 – 全站底</b></td><td>全站</td><td>1% 比例</td><td><div class="pgr"><div class="pgr-track"><div class="pgr-fill blue" style="width:37%"></div></div><div class="pgr-txt">37% &nbsp;預估 1,840 / 5,000 點</div></div></td><td style="font-size:11px">2026/05/01 12:00 AM<br>~ 2026/06/30 11:59 PM</td><td><span class="bdg green">進行中</span></td><td><label class="tog"><input type="checkbox" checked><span class="sl"></span></label></td><td><a style="color:var(--primary);cursor:pointer;font-size:11px">編輯</a> <a style="color:var(--red);cursor:pointer;font-size:11px;margin-left:4px">刪除</a></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- 點數管理 -->
+      <!-- ── 點數管理 ── -->
       <div class="view" id="vPt">
-        <div class="page-head"><div><div class="page-title">點數管理</div><div class="page-desc">查詢發放記錄、分析點數、管理餘額與設定。</div></div></div>
+        <div class="ph">
+          <div><div class="pt">點數管理</div><div class="pd">查看 LINE POINTS 發放明細、點數分析與服務設定。</div></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="ts"><span class="dot"></span>資料截至 2026/05/26 11:45 AM</div>
+            <div class="dr">📅 2026/04/20 – 2026/05/19 ▾</div>
+          </div>
+        </div>
         <div class="tabs">
           <div class="tab active" id="tabDetail" onclick="goTab('detail')">發放明細</div>
           <div class="tab" id="tabAnal" onclick="goTab('anal')">點數分析</div>
           <div class="tab" id="tabSet" onclick="goTab('set')">餘額與設定</div>
         </div>
-        <div id="tcDetail"><div class="placeholder">每筆符合回饋資格的訂單發放狀態（示意）</div></div>
-        <div id="tcAnal" style="display:none"><div class="placeholder">點數發放趨勢、KPI 分析（示意）</div></div>
-        <div id="tcSet" style="display:none"><div class="placeholder">儲值餘額、通知偏好、全站設定（示意）</div></div>
+
+        <!-- 發放明細 -->
+        <div id="tcDetail">
+          <div class="fb">
+            <label>日期</label><input type="date" value="2026-05-01"> <span style="color:var(--t3)">～</span> <input type="date" value="2026-05-31">
+            <label>狀態</label><select style="width:90px"><option>全部</option><option>已領取</option><option>未領取</option><option>已過期</option></select>
+            <label>回饋活動</label><select style="width:120px"><option>全部</option></select>
+            <label>訂單編號</label><input type="text" placeholder="輸入訂單編號" style="width:140px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
+            <div class="spacer"></div>
+            <button class="btn sm primary">套用</button><button class="btn sm">清除篩選</button><button class="btn sm">↓ 匯出 CSV</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>發送時間</th><th>訂單編號</th><th>會員</th><th>回饋活動</th><th>點數</th><th>狀態</th><th>領取時間</th><th>到期時間</th></tr></thead>
+              <tbody>
+                <tr><td>2026/05/18 02:15 AM</td><td><a style="color:var(--primary)">#SL2026051800123</a></td><td>陳怡倫<br><span style="color:var(--t3);font-size:11px">ch***@gmail.com</span></td><td>聖誕禮品季 – 全站底</td><td><b>26</b></td><td><span class="bdg green">已領取</span></td><td>2026/05/18 02:32 PM</td><td>2026/08/18 11:59 PM</td></tr>
+                <tr><td>2026/05/17 02:15 AM</td><td><a style="color:var(--primary)">#SL2026051700091</a></td><td>林俊宇<br><span style="color:var(--t3);font-size:11px">li***@gmail.com</span></td><td>3C 加碼回饋</td><td><b>128</b></td><td><span class="bdg gray">未領取</span></td><td>—</td><td>2026/08/17 11:59 PM</td></tr>
+                <tr><td>2026/05/17 02:15 AM</td><td><a style="color:var(--primary)">#SL2026051700088</a></td><td>王雅芬<br><span style="color:var(--t3);font-size:11px">wa***@gmail.com</span></td><td>熱銷洗髮系列</td><td><b>45</b></td><td><span class="bdg green">已領取</span></td><td>2026/05/17 09:11 AM</td><td>2026/08/17 11:59 PM</td></tr>
+                <tr><td>2026/05/16 02:15 AM</td><td><a style="color:var(--primary)">#SL2026051600142</a></td><td>吳怡仁<br><span style="color:var(--t3);font-size:11px">wu***@yahoo.com.tw</span></td><td>聖誕禮品季 – 全站底</td><td><b>38</b></td><td><span class="bdg red">已過期</span></td><td>—</td><td>2026/05/12 11:59 PM</td></tr>
+                <tr><td>2026/05/15 02:15 AM</td><td><a style="color:var(--primary)">#SL2026051500098</a></td><td>張育瑩<br><span style="color:var(--t3);font-size:11px">ch***@gmail.com</span></td><td>3C 加碼回饋</td><td><b>192</b></td><td><span class="bdg green">已領取</span></td><td>2026/05/15 09:45 PM</td><td>2026/08/15 11:59 PM</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 點數分析 -->
+        <div id="tcAnal" style="display:none">
+          <div class="anal-card">
+            <div class="anal-inner">
+              <div class="anal-left">
+                <div style="font-size:12px;font-weight:600;margin-bottom:10px">點數發放分析</div>
+                <div class="anal-row"><span class="anal-dot" style="background:#1875F0"></span><span class="anal-label">已發放點數</span><span style="font-size:16px;font-weight:700">12,850</span></div>
+                <div class="anal-row"><span class="anal-dot" style="background:#16A34A"></span><span class="anal-label">已領取點數</span><span style="font-size:16px;font-weight:700">9,310</span></div>
+                <div class="anal-row"><span class="anal-dot" style="background:#F59E0B"></span><span class="anal-label">未領取點數</span><span style="font-size:16px;font-weight:700">3,540</span></div>
+                <div class="anal-row"><span class="anal-dot" style="background:#EF4444"></span><span class="anal-label">已過期點數</span><span style="font-size:16px;font-weight:700">0</span></div>
+              </div>
+              <div class="anal-right">
+                <div style="font-size:11px;color:var(--t2);margin-bottom:6px">近 12 個月已發放點數</div>
+                <div class="chart">
+                  <div class="bar hist" style="height:30%"></div><div class="bar hist" style="height:33%"></div><div class="bar hist" style="height:45%"></div><div class="bar hist" style="height:56%"></div><div class="bar hist" style="height:65%"></div><div class="bar hist" style="height:70%"></div><div class="bar hist" style="height:75%"></div><div class="bar hist" style="height:76%"></div><div class="bar hist" style="height:80%"></div><div class="bar hist" style="height:88%"></div><div class="bar hist" style="height:94%"></div><div class="bar cur" style="height:100%"></div>
+                </div>
+                <div class="chart-labels"><span>6月</span><span>7月</span><span>8月</span><span>9月</span><span>10月</span><span>11月</span><span>12月</span><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span></div>
+                <div style="display:flex;gap:12px;font-size:10px;color:var(--t3);margin-top:4px">
+                  <span><span style="color:#1875F0">■</span> 當月</span><span><span style="color:#D1D5DB">■</span> 歷史</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="kl">點數領取率</div><div class="kv">72.4%</div><div class="kd up">↑ 3.1% vs 上期</div></div>
+            <div class="kpi"><div class="kl">符合資格訂單數</div><div class="kv">384</div><div class="kd up">↑ 18.2%</div></div>
+            <div class="kpi"><div class="kl">平均回饋率</div><div class="kv">2.8%</div><div class="ks">於符合資格訂單</div></div>
+            <div class="kpi"><div class="kl">進行中活動數</div><div class="kv">4</div><div class="ks">總共建立 7 條</div></div>
+          </div>
+          <div class="two-col">
+            <div class="distrib"><div class="dl">活動發放點數分佈</div>
+              <div class="dr-row"><span class="dr-name">3C 加碼回饋</span><div class="dr-bar"><div class="dr-fill" style="width:88%"></div></div><span class="dr-val">5,840</span></div>
+              <div class="dr-row"><span class="dr-name">聖誕禮品季</span><div class="dr-bar"><div class="dr-fill" style="width:60%"></div></div><span class="dr-val">3,960</span></div>
+              <div class="dr-row"><span class="dr-name">熱銷洗髮系列</span><div class="dr-bar"><div class="dr-fill" style="width:32%"></div></div><span class="dr-val">2,110</span></div>
+              <div class="dr-row"><span class="dr-name">夏日折扣加碼</span><div class="dr-bar"><div class="dr-fill" style="width:14%"></div></div><span class="dr-val">940</span></div>
+            </div>
+            <div class="distrib"><div class="dl">活動領取率</div>
+              <div class="dr-row"><span class="dr-name">熱銷洗髮系列</span><div class="dr-bar"><div class="dr-fill" style="width:85%"></div></div><span class="dr-val">85%</span></div>
+              <div class="dr-row"><span class="dr-name">聖誕禮品季</span><div class="dr-bar"><div class="dr-fill" style="width:76%"></div></div><span class="dr-val">76%</span></div>
+              <div class="dr-row"><span class="dr-name">3C 加碼回饋</span><div class="dr-bar"><div class="dr-fill" style="width:68%"></div></div><span class="dr-val">68%</span></div>
+              <div class="dr-row"><span class="dr-name">夏日折扣加碼</span><div class="dr-bar"><div class="dr-fill" style="width:55%"></div></div><span class="dr-val">55%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 餘額與設定 -->
+        <div id="tcSet" style="display:none">
+          <div class="bal-row">
+            <div class="bal highlight">
+              <div class="bl">目前可用點數</div>
+              <div class="bv primary">38,560</div>
+              <div class="bs">最近一次儲值：2026-05-12｜10,000 點</div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn primary sm">＋ 申請儲值</button>
+                <button class="btn sm">儲值紀錄</button>
+              </div>
+            </div>
+            <div class="bal"><div class="bl">本月預支點數</div><div class="bv">0</div><div class="bs">點數餘額不足時自動預支</div></div>
+            <div class="bal"><div class="bl">本月已發放</div><div class="bv">12,850</div><div class="bs">月結預計：NT$12,850</div></div>
+          </div>
+          <div class="sec">
+            <div class="sec-title">預支結算</div>
+            <div style="font-size:12px;color:var(--t2);margin-bottom:10px">點數餘額不足時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，系統將自動預支點數完成發放，並於每月進行結算。</div>
+            <div class="sec-row"><span class="sk">結算週期</span><span class="sv">每月 1 日結算上月預支點數用量，付款期限為帳單寄出後 7 個工作日</span></div>
+          </div>
+          <div class="sec">
+            <div class="sec-title">通知偏好 <button class="btn sm">儲存變更</button></div>
+            <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:8px">點數餘額</div>
+            <div class="sec-row"><span class="sk">即將用罄通知</span><span class="sv" style="display:flex;align-items:center;gap:8px"><label class="tog"><input type="checkbox" checked><span class="sl"></span></label> 啟用 <span class="bdg blue">強制啟用</span></span></div>
+            <div class="sec-row"><span class="sk">通知門檻</span><span class="sv">已使用達 80% 時通知</span></div>
+            <div style="font-size:12px;font-weight:600;color:var(--t2);margin:10px 0 8px">活動預算</div>
+            <div class="sec-row"><span class="sk">即將用罄通知</span><span class="sv"><label class="tog"><input type="checkbox" checked><span class="sl"></span></label></span></div>
+            <div class="sec-row"><span class="sk">通知門檻</span><span class="sv">已使用達 90% 時通知</span></div>
+            <div class="sec-row"><span class="sk">通知信箱</span><span class="sv">rooney@12cm.com.tw</span></div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -274,154 +569,127 @@ button{font-family:inherit;cursor:pointer}
 <!-- ══ SETUP MODAL ══ -->
 <div class="overlay" id="overlay">
   <div class="modal">
-
-    <!-- Header -->
-    <div class="modal-hd">
+    <div class="mhd">
       <div class="step-track">
-        <div class="s-pip active" id="pip1">1</div>
-        <div class="s-conn" id="conn"></div>
-        <div class="s-pip" id="pip2">2</div>
+        <div class="spip active" id="pip1">1</div>
+        <div class="sconn" id="sconn"></div>
+        <div class="spip" id="pip2">2</div>
       </div>
-      <div class="modal-title" id="mTitle">發點規則設定</div>
-      <div class="modal-sub" id="mSub">設定點數何時發送給消費者，以及發放管道。完成後可在「餘額與設定」調整。</div>
+      <div class="mtitle" id="mTitle">發點規則設定</div>
+      <div class="msub" id="mSub">設定點數何時發送給消費者，以及發放管道。完成後可在「餘額與設定」調整。</div>
     </div>
 
     <!-- Step 1 -->
-    <div class="modal-bd" id="s1">
-
-      <!-- 發點基準 -->
+    <div class="mbd" id="s1">
       <div class="field">
-        <div class="field-label">發點基準 <span class="req">*</span></div>
-        <select class="sel" id="fTrigger" onchange="v1()">
+        <div class="fl">發點基準 <span class="rq">*</span></div>
+        <select class="sel" id="fTrig" onchange="v1()">
           <option value="">請選擇</option>
           <option value="a">訂單狀態已完成</option>
           <option value="b">送貨狀態已到達</option>
           <option value="c">送貨狀態已取貨</option>
         </select>
         <div class="hint">符合回饋資格的訂單達到所選狀態時，系統開始計算發點日期</div>
-        <div class="err" id="eTrigger">請選擇發點基準</div>
+        <div class="err" id="eTrig">請選擇發點基準</div>
       </div>
-
-      <!-- 延遲天數 -->
       <div class="field">
-        <div class="field-label">延遲天數 <span class="req">*</span></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input class="input" type="number" id="fDelay" min="0" value="0" style="width:96px" oninput="v1()"> <span style="font-size:13px;color:var(--text-2)">天</span>
+        <div class="fl">延遲天數 <span class="rq">*</span></div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <input class="inp" type="number" id="fDelay" min="0" value="0" style="width:90px" oninput="v1()">
+          <span style="font-size:12px;color:var(--t2)">天</span>
         </div>
         <div class="hint">達到發點基準後，額外等待 N 天再寄送領點連結（填 0 不延遲）</div>
         <div class="err" id="eDelay">請輸入 0 以上整數</div>
       </div>
-
-      <!-- 發放管道 -->
       <div class="field">
-        <div class="field-label">領點連結發放管道 <span class="req">*</span></div>
-        <div class="ch-list">
-          <div class="ch-row" id="chEmail">
-            <div class="ch-head" onclick="toggleCh('email')">
-              <input class="ch-cb" type="checkbox" id="cbEmail" onclick="event.stopPropagation();toggleCh('email')"> <span class="ch-name">SHOPLINE Email 系統</span>
+        <div class="fl">領點連結發放管道 <span class="rq">*</span></div>
+        <div class="chlist">
+          <div class="crow" id="chEmail">
+            <div class="chead" onclick="togCh('email')">
+              <input class="ccb" type="checkbox" id="cbEmail" onclick="event.stopPropagation();togCh('email')">
+              <span class="cname">SHOPLINE Email 系統</span>
             </div>
           </div>
-          <div class="ch-row" id="chLine">
-            <div class="ch-head" onclick="toggleCh('line')">
-              <input class="ch-cb" type="checkbox" id="cbLine" onclick="event.stopPropagation();toggleCh('line')"> <span class="ch-name">LINE Official Account</span>
+          <div class="crow" id="chLine">
+            <div class="chead" onclick="togCh('line')">
+              <input class="ccb" type="checkbox" id="cbLine" onclick="event.stopPropagation();togCh('line')">
+              <span class="cname">LINE Official Account</span>
             </div>
-            <div class="ch-body">
-              <label>LINE Channel Access Token <span style="color:var(--danger)">*</span></label>
-              <input class="input" id="fToken" type="text" placeholder="貼上 Channel Access Token" oninput="v1()">
-              <div class="hint">於 LINE Developers Console 取得。啟用後超出 LINE OA 免費訊息額度的部分，由 LINE 向商家直接收費，與本服務無關。</div>
+            <div class="cbody">
+              <label>LINE Channel Access Token <span style="color:var(--red)">*</span></label>
+              <input class="inp" id="fToken" type="text" placeholder="貼上 Channel Access Token" oninput="v1()">
+              <div class="hint">於 LINE Developers Console 取得。超出 LINE OA 免費訊息額度的部分，由 LINE 向商家直接收費，與本服務無關。</div>
             </div>
           </div>
         </div>
         <div class="err" id="eCh">請至少選擇一個發放管道</div>
       </div>
-
-      <!-- 寄送時間 -->
       <div class="field">
-        <div class="field-label">領點連結寄送時間 <span class="req">*</span></div>
-        <div class="time-wrap">
-          <input class="t-num" type="number" id="tH" min="1" max="12" placeholder="HH" oninput="clampH();v1()">
-          <span class="t-sep">:</span>
-          <input class="t-num" type="number" id="tM" min="0" max="59" placeholder="MM" oninput="clampM();v1()">
-          <select class="t-ampm" id="tAP" onchange="v1()">
-            <option value="">AM/PM</option>
-            <option>AM</option><option>PM</option>
+        <div class="fl">領點連結寄送時間 <span class="rq">*</span></div>
+        <div class="tw">
+          <input class="tn" type="number" id="tH" min="1" max="12" placeholder="HH" oninput="clH();v1()">
+          <span class="tsep">:</span>
+          <input class="tn" type="number" id="tM" min="0" max="59" placeholder="MM" oninput="clM();v1()">
+          <select class="tap" id="tAP" onchange="v1()">
+            <option value="">AM/PM</option><option>AM</option><option>PM</option>
           </select>
         </div>
         <div class="hint">每日自動寄送領點連結給符合發點條件的訂單</div>
         <div class="err" id="eTime">請完整填寫寄送時間</div>
       </div>
-
-      <!-- 回饋上限 -->
       <div class="field">
-        <div class="field-label">單一訂單回饋上限 <span class="req">*</span></div>
-        <div class="limit-row">
+        <div class="fl">單一訂單回饋上限 <span class="rq">*</span></div>
+        <div class="lrow">
           <label class="lopt"><input type="radio" name="lm" value="none" checked onchange="setLm('none')"> 不設上限</label>
-          <label class="lopt">
-            <input type="radio" name="lm" value="set" onchange="setLm('set')"> 設定上限
-            <div class="limit-inline" id="lInline">
-              <input class="input" type="number" id="fLimit" min="1" placeholder="點數" oninput="v1()">
-              <span class="unit">點 / 筆</span>
-            </div>
+          <label class="lopt"><input type="radio" name="lm" value="set" onchange="setLm('set')"> 設定上限
+            <div class="linl" id="lInl"><input class="inp" type="number" id="fLim" min="1" placeholder="點數" oninput="v1()"><span class="unit">點 / 筆</span></div>
           </label>
         </div>
         <div class="hint">每筆訂單可獲得的最高點數，超出此值將截斷</div>
-        <div class="err" id="eLimit">請輸入正整數</div>
+        <div class="err" id="eLim">請輸入正整數</div>
       </div>
-
-      <!-- 效期（唯讀） -->
       <div class="field">
-        <div class="field-label">領點連結效期</div>
-        <div class="readonly-field"><span class="rv">60 天</span><span class="rs">固定值，不可調整</span></div>
+        <div class="fl">領點連結效期</div>
+        <div class="rof"><span class="rv">60 天</span><span class="rs">固定值，不可調整</span></div>
         <div class="hint">系統發送連結後，消費者須於 60 天內點擊連結完成領取</div>
       </div>
-
     </div>
 
     <!-- Step 2 -->
     <div style="display:none" id="s2">
-      <div class="notice blue">
-        <span class="ni">ℹ️</span>
-        <p><strong>關於預支點數機制</strong>當點數餘額不足時，系統仍會自動為符合回饋資格的訂單完成點數發放（預支）。預支點數將於每月 1 日結算，帳單寄出後 7 個工作日內付款。建議定期確認餘額充足，避免累積預支費用。</p>
+      <div class="mnotice blue">
+        <span class="ni2">ℹ️</span>
+        <p><b>關於預支點數機制</b>當點數餘額不足時，系統仍會自動為符合回饋資格的訂單完成點數發放（預支）。預支點數將於每月 1 日結算，帳單寄出後 7 個工作日內付款。建議定期確認餘額充足。</p>
       </div>
-      <div class="modal-bd">
-
-        <!-- 帳務信箱 -->
+      <div class="mbd">
         <div class="field">
-          <div class="field-label">帳務通知信箱 <span class="req">*</span></div>
-          <input class="input" type="email" id="fBill" placeholder="example@company.com" oninput="v2()">
+          <div class="fl">帳務通知信箱 <span class="rq">*</span></div>
+          <input class="inp" type="email" id="fBill" placeholder="example@company.com" oninput="v2()">
           <div class="hint">月結帳單與付款提醒將寄送至此信箱</div>
           <div class="err" id="eBill">請輸入有效的 Email</div>
         </div>
-
-        <!-- 通知門檻 -->
         <div class="field">
-          <div class="field-label">用罄通知門檻</div>
-          <div class="notif-rows">
-            <div class="notif-row">
-              <div class="nl">活動預算即將用罄<small>使用達 X% 時發送通知</small></div>
-              <input class="input" type="number" id="fBudget" value="90" min="1" max="99" oninput="v2()">
-              <span class="unit">%</span>
+          <div class="fl">用罄通知門檻</div>
+          <div class="nrows">
+            <div class="nrow">
+              <div class="nlabel">活動預算即將用罄<small>使用達 X% 時發送通知</small></div>
+              <input class="inp" type="number" id="fBudg" value="90" min="1" max="99" oninput="v2()"><span class="unit">%</span>
             </div>
-            <div class="notif-row">
-              <div class="nl">儲值點數即將用罄<small>使用達 X% 時發送通知（強制啟用）</small></div>
-              <input class="input" type="number" id="fBalance" value="80" min="1" max="99" oninput="v2()">
-              <span class="unit">%</span>
+            <div class="nrow">
+              <div class="nlabel">儲值點數即將用罄<small>使用達 X% 時發送通知（強制啟用）</small></div>
+              <input class="inp" type="number" id="fBal" value="80" min="1" max="99" oninput="v2()"><span class="unit">%</span>
             </div>
           </div>
         </div>
-
-        <!-- 通知信箱 -->
         <div class="field">
-          <div class="field-label">即將用罄通知信箱</div>
-          <input class="input" type="email" id="fNotif" placeholder="不填則同帳務信箱">
+          <div class="fl">即將用罄通知信箱</div>
+          <input class="inp" type="email" id="fNotif" placeholder="不填則同帳務信箱">
           <div class="hint">預算或點數餘額達門檻時，通知寄送至此信箱</div>
         </div>
-
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="modal-ft">
+    <div class="mft">
       <button class="btn ghost" id="backBtn" style="display:none" onclick="toStep(1)">← 上一步</button>
       <button class="btn primary" id="mainBtn" onclick="nextStep()" disabled>下一步 →</button>
     </div>
@@ -430,253 +698,177 @@ button{font-family:inherit;cursor:pointer}
 
 <!-- ══ TUTORIAL ══ -->
 <div class="tut" id="tut">
-  <div class="tut-bg"></div>
-  <div class="spotlight" id="spot"></div>
-  <div class="tut-card" id="tutCard">
-    <div class="tut-step" id="tutStep"></div>
-    <h4 id="tutTitle"></h4>
-    <p id="tutBody"></p>
-    <div class="tut-arrow" id="tutArr"></div>
-    <div class="tut-foot">
-      <div class="tut-dots" id="tutDots"></div>
-      <div class="tut-btns">
-        <button class="tut-skip" onclick="endTut()">跳過引導</button>
-        <button class="tut-back" id="tutBack" onclick="moveTut(-1)">← 上一步</button>
-        <button class="tut-next" id="tutNext" onclick="moveTut(1)">下一步 →</button>
+  <div class="spot" id="spot"></div>
+  <div class="tc" id="tc">
+    <div class="tstep" id="tStep"></div>
+    <h4 id="tTitle"></h4>
+    <p id="tBody"></p>
+    <div class="tarr" id="tArr"></div>
+    <div class="tfoot">
+      <div class="tdots" id="tDots"></div>
+      <div class="tbtns">
+        <button class="tskip" onclick="endTut()">跳過引導</button>
+        <button class="tback" id="tBack" onclick="moveTut(-1)">← 上一步</button>
+        <button class="tnext" id="tNext" onclick="moveTut(1)">下一步 →</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ─── View / Tab switching ───────────────────────
-const views = {ov:'回饋總覽', cp:'回饋活動', pt:'點數管理'};
+// ── View switching ──
+const VL={ov:'回饋總覽',cp:'回饋活動',pt:'點數管理'};
 function go(k){
-  Object.keys(views).forEach(v=>{
-    document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('show', v===k);
-    document.getElementById('nav'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('active', v===k);
+  ['ov','cp','pt'].forEach(v=>{
+    document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('show',v===k);
+    document.getElementById('nav'+v.charAt(0).toUpperCase()+v.slice(1)).classList.toggle('active',v===k);
   });
-  document.getElementById('bcHere').textContent = views[k];
-  document.getElementById('subTabs').style.display = k==='pt' ? 'block' : 'none';
+  document.getElementById('bcH').textContent=VL[k];
+  document.getElementById('subTabs').style.display=k==='pt'?'block':'none';
 }
 function goTab(t){
   ['detail','anal','set'].forEach(x=>{
-    document.getElementById('tc'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = x===t?'block':'none';
-    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===t);
-    const sn = document.getElementById('st'+x.charAt(0).toUpperCase()+x.slice(1));
-    if(sn) sn.classList.toggle('active', x===t);
+    document.getElementById('tc'+x.charAt(0).toUpperCase()+x.slice(1)).style.display=x===t?'block':'none';
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active',x===t);
+    const sn=document.getElementById('st'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(sn)sn.classList.toggle('active',x===t);
   });
 }
 
-// ─── Modal step state ──────────────────────────
-let step = 1;
-let lm = 'none';
-let emailOn = false, lineOn = false;
-
+// ── Modal ──
+let mStep=1,lm='none',emailOn=false,lineOn=false;
 function toStep(n){
-  step = n;
-  const s1 = document.getElementById('s1');
-  const s2 = document.getElementById('s2');
-  const back = document.getElementById('backBtn');
-  const main = document.getElementById('mainBtn');
-  const p1 = document.getElementById('pip1'), p2 = document.getElementById('pip2'), conn = document.getElementById('conn');
-
+  mStep=n;
+  const p1=document.getElementById('pip1'),p2=document.getElementById('pip2'),sc=document.getElementById('sconn');
   if(n===1){
-    s1.style.display='block'; s2.style.display='none';
-    back.style.display='none';
+    document.getElementById('s1').style.display='block';
+    document.getElementById('s2').style.display='none';
+    document.getElementById('backBtn').style.display='none';
     document.getElementById('mTitle').textContent='發點規則設定';
     document.getElementById('mSub').textContent='設定點數何時發送給消費者，以及發放管道。完成後可在「餘額與設定」調整。';
-    p1.className='s-pip active'; p2.className='s-pip'; conn.className='s-conn';
-    main.textContent='下一步 →'; main.disabled=true;
+    p1.className='spip active';p2.className='spip';sc.className='sconn';
+    document.getElementById('mainBtn').textContent='下一步 →';
     v1();
   } else {
-    s1.style.display='none'; s2.style.display='block';
-    back.style.display='inline-flex';
+    document.getElementById('s1').style.display='none';
+    document.getElementById('s2').style.display='block';
+    document.getElementById('backBtn').style.display='inline-flex';
     document.getElementById('mTitle').textContent='帳務與通知設定';
     document.getElementById('mSub').textContent='設定帳務通知信箱與點數用罄提醒。';
-    p1.className='s-pip done'; p2.className='s-pip active'; conn.className='s-conn done';
-    main.textContent='完成設定，進入後台'; main.disabled=true;
+    p1.className='spip done';p2.className='spip active';sc.className='sconn done';
+    document.getElementById('mainBtn').textContent='完成設定，進入後台';
     v2();
   }
 }
-
 function nextStep(){
-  if(step===1){
-    // show errors
-    let ok = runValidate1();
-    if(ok) toStep(2);
-  } else {
-    let ok = runValidate2();
-    if(ok){ document.getElementById('overlay').style.display='none'; startTut(); }
-  }
+  if(mStep===1){if(rv1())toStep(2);}
+  else{if(rv2()){document.getElementById('overlay').classList.add('hidden');startTut();}}
 }
-
-// ─── Step 1 validation ────────────────────────
-function clampH(){ const e=document.getElementById('tH'); if(+e.value>12)e.value=12; if(+e.value<1&&e.value!=='')e.value=1; }
-function clampM(){ const e=document.getElementById('tM'); if(+e.value>59)e.value=59; if(+e.value<0)e.value=0; }
-
-function setLm(m){
-  lm=m;
-  document.getElementById('lInline').classList.toggle('on', m==='set');
-  if(m==='none') document.getElementById('eLimit').classList.remove('on');
+function clH(){const e=document.getElementById('tH');if(+e.value>12)e.value=12;if(e.value!==''&&+e.value<1)e.value=1;}
+function clM(){const e=document.getElementById('tM');if(+e.value>59)e.value=59;if(+e.value<0)e.value=0;}
+function setLm(m){lm=m;document.getElementById('lInl').classList.toggle('on',m==='set');v1();}
+function togCh(t){
+  if(t==='email'){emailOn=!emailOn;document.getElementById('cbEmail').checked=emailOn;document.getElementById('chEmail').classList.toggle('on',emailOn);}
+  else{lineOn=!lineOn;document.getElementById('cbLine').checked=lineOn;document.getElementById('chLine').classList.toggle('on',lineOn);}
   v1();
 }
-
-function toggleCh(t){
-  if(t==='email'){
-    emailOn=!emailOn;
-    document.getElementById('cbEmail').checked=emailOn;
-    document.getElementById('chEmail').classList.toggle('on', emailOn);
-  } else {
-    lineOn=!lineOn;
-    document.getElementById('cbLine').checked=lineOn;
-    document.getElementById('chLine').classList.toggle('on', lineOn);
-  }
-  v1();
-}
-
 function v1(){
-  // live-enable the button without showing errors
-  const tr=document.getElementById('fTrigger').value;
+  const tr=document.getElementById('fTrig').value;
   const dy=document.getElementById('fDelay').value;
-  const dyOk=dy!==''&&Number.isInteger(+dy)&&+dy>=0;
+  const dyOk=dy!==''&&!isNaN(+dy)&&+dy>=0&&Number.isInteger(+dy);
   const chOk=emailOn||lineOn;
   const tkOk=!lineOn||document.getElementById('fToken').value.trim()!=='';
-  const h=document.getElementById('tH').value, m=document.getElementById('tM').value, ap=document.getElementById('tAP').value;
-  const tmOk=h&&m!==''&&ap;
-  const limOk=lm==='none'||(document.getElementById('fLimit').value!==''&&+document.getElementById('fLimit').value>0);
-  document.getElementById('mainBtn').disabled=!(tr&&dyOk&&chOk&&tkOk&&tmOk&&limOk);
-}
-
-function runValidate1(){
-  let ok=true;
-  // trigger
-  const tr=document.getElementById('fTrigger').value;
-  document.getElementById('eTrigger').classList.toggle('on',!tr);
-  document.getElementById('fTrigger').classList.toggle('bad',!tr);
-  if(!tr)ok=false;
-  // delay
-  const dy=document.getElementById('fDelay').value;
-  const dyOk=dy!==''&&Number.isInteger(+dy)&&+dy>=0;
-  document.getElementById('eDelay').classList.toggle('on',!dyOk);
-  document.getElementById('fDelay').classList.toggle('bad',!dyOk);
-  if(!dyOk)ok=false;
-  // channel
-  const chOk=emailOn||lineOn;
-  document.getElementById('eCh').classList.toggle('on',!chOk);
-  if(!chOk)ok=false;
-  // line token
-  if(lineOn){const tk=document.getElementById('fToken').value.trim();if(!tk){document.getElementById('fToken').classList.add('bad');ok=false;}else{document.getElementById('fToken').classList.remove('bad');}}
-  // time
   const h=document.getElementById('tH').value,m=document.getElementById('tM').value,ap=document.getElementById('tAP').value;
   const tmOk=h&&m!==''&&ap;
-  document.getElementById('eTime').classList.toggle('on',!tmOk);
-  [document.getElementById('tH'),document.getElementById('tM'),document.getElementById('tAP')].forEach(e=>e.classList.toggle('bad',!tmOk));
-  if(!tmOk)ok=false;
-  // limit
-  if(lm==='set'){const lv=document.getElementById('fLimit').value;const lvOk=lv!==''&&+lv>0;document.getElementById('eLimit').classList.toggle('on',!lvOk);document.getElementById('fLimit').classList.toggle('bad',!lvOk);if(!lvOk)ok=false;}
-  // scroll to first error
-  if(!ok){const firstErr=document.querySelector('#s1 .err.on');if(firstErr)firstErr.scrollIntoView({block:'center',behavior:'smooth'});}
-  return ok;
+  const limOk=lm==='none'||(document.getElementById('fLim').value!==''&&+document.getElementById('fLim').value>0);
+  document.getElementById('mainBtn').disabled=!(tr&&dyOk&&chOk&&tkOk&&tmOk&&limOk);
 }
-
-// ─── Step 2 validation ────────────────────────
-function v2(){
-  const bill=document.getElementById('fBill').value;
-  const billOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bill);
-  const bt=document.getElementById('fBudget').value;
-  const blt=document.getElementById('fBalance').value;
-  const thOk=bt&&+bt>0&&+bt<100&&blt&&+blt>0&&+blt<100;
-  document.getElementById('mainBtn').disabled=!(billOk&&thOk);
-}
-function runValidate2(){
+function rv1(){
   let ok=true;
+  const tr=document.getElementById('fTrig').value;
+  document.getElementById('eTrig').classList.toggle('on',!tr);document.getElementById('fTrig').classList.toggle('bad',!tr);if(!tr)ok=false;
+  const dy=document.getElementById('fDelay').value;const dyOk=dy!==''&&!isNaN(+dy)&&+dy>=0&&Number.isInteger(+dy);
+  document.getElementById('eDelay').classList.toggle('on',!dyOk);document.getElementById('fDelay').classList.toggle('bad',!dyOk);if(!dyOk)ok=false;
+  const chOk=emailOn||lineOn;document.getElementById('eCh').classList.toggle('on',!chOk);if(!chOk)ok=false;
+  if(lineOn){const tk=document.getElementById('fToken').value.trim();document.getElementById('fToken').classList.toggle('bad',!tk);if(!tk)ok=false;}
+  const h=document.getElementById('tH').value,m=document.getElementById('tM').value,ap=document.getElementById('tAP').value;const tmOk=h&&m!==''&&ap;
+  document.getElementById('eTime').classList.toggle('on',!tmOk);['tH','tM','tAP'].forEach(id=>document.getElementById(id).classList.toggle('bad',!tmOk));if(!tmOk)ok=false;
+  if(lm==='set'){const lv=document.getElementById('fLim').value;const lvOk=lv!==''&&+lv>0;document.getElementById('eLim').classList.toggle('on',!lvOk);document.getElementById('fLim').classList.toggle('bad',!lvOk);if(!lvOk)ok=false;}
+  if(!ok){const fe=document.querySelector('#s1 .err.on');if(fe)fe.scrollIntoView({block:'center',behavior:'smooth'});}
+  return ok;
+}
+function v2(){
+  const b=document.getElementById('fBudg').value,bl=document.getElementById('fBal').value;
+  const bill=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('fBill').value);
+  document.getElementById('mainBtn').disabled=!(bill&&b&&+b>0&&+b<100&&bl&&+bl>0&&+bl<100);
+}
+function rv2(){
   const bill=document.getElementById('fBill').value;
-  const billOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bill);
-  document.getElementById('eBill').classList.toggle('on',!billOk);
-  document.getElementById('fBill').classList.toggle('bad',!billOk);
-  if(!billOk)ok=false;
+  const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bill);
+  document.getElementById('eBill').classList.toggle('on',!ok);document.getElementById('fBill').classList.toggle('bad',!ok);
   return ok;
 }
 
-// ─── Tutorial ─────────────────────────────────
+// ── Tutorial ──
 const STEPS=[
-  {label:'1 / 6',title:'後台三個主要頁面',
-   body:'點數回饋後台分為三個頁面：<b>回饋總覽</b>（數據分析）、<b>回饋活動</b>（建立管理活動）、<b>點數管理</b>（發放記錄、分析、餘額設定）。',
-   tid:'navSub', side:'right', view:null, tab:null},
-  {label:'2 / 6',title:'回饋總覽：時間篩選',
-   body:'這裡顯示訂單回饋數據分析，<b>預設顯示近 14 天</b>。可切換區間（近 30 天、近 90 天或自訂），套用後可使用右上角「匯出」下載報表。',
-   tid:'timeFilter', side:'below', view:'ov', tab:null},
-  {label:'3 / 6',title:'回饋活動：新增活動',
-   body:'點擊「＋ 新增回饋活動」建立第一個活動。設定回饋條件、方式與預算後，系統自動為每筆訂單選擇最高回饋。',
-   tid:'addBtn', side:'below', view:'cp', tab:null},
-  {label:'4 / 6',title:'點數管理：發放明細',
-   body:'每筆符合回饋資格的訂單都記錄在這裡，可查詢<b>待發送、已發送、領取狀態</b>，並點擊單筆查看完整訂單詳情。',
-   tid:'tabDetail', side:'above', view:'pt', tab:'detail'},
-  {label:'5 / 6',title:'點數管理：點數分析',
-   body:'查看點數<b>發放趨勢、領取率</b>與活動效益比較，以 KPI 卡片與圖表呈現，協助評估活動成效。',
-   tid:'tabAnal', side:'above', view:'pt', tab:'anal'},
-  {label:'6 / 6',title:'點數管理：餘額與設定',
-   body:'在這裡<b>申請儲值點數</b>，並隨時調整基本設定（發點基準、延遲天數、通知偏好等）。',
-   tid:'tabSet', side:'above', view:'pt', tab:'set'},
+  // 1：三頁概覽
+  {s:'1/9',t:'後台三個主要頁面',b:'點數回饋後台分為三個頁面：<b>回饋總覽</b>（數據分析）、<b>回饋活動</b>（建立與管理活動）、<b>點數管理</b>（發放記錄、分析、餘額設定）。',id:'navSub',side:'right',view:null,tab:null},
+  // 2：前往回饋總覽（切換頁面前先框選導覽）
+  {s:'2/9',t:'前往：回饋總覽',b:'左側點選「回饋總覽」進入數據分析頁面。',id:'navOv',side:'right',view:null,tab:null},
+  // 3：回饋總覽內容（進入頁面後框選時間篩選＋匯出）
+  {s:'3/9',t:'回饋總覽：時間篩選與匯出',b:'預設顯示<b>近 14 天</b>數據，可切換為近 30 天、近 90 天或自訂區間。選好後點「套用」，右側「匯出」可下載報表。',id:'ovTopActions',side:'below',view:'ov',tab:null},
+  // 4：前往回饋活動
+  {s:'4/9',t:'前往：回饋活動',b:'左側點選「回饋活動」進入活動管理頁面。',id:'navCp',side:'right',view:null,tab:null},
+  // 5：回饋活動內容
+  {s:'5/9',t:'回饋活動：新增活動',b:'點擊右上角「＋ 新增回饋活動」建立活動，設定回饋條件、方式與預算。建立後系統自動為每筆訂單套用最高回饋。',id:'addBtn',side:'below',view:'cp',tab:null},
+  // 6：前往點數管理
+  {s:'6/9',t:'前往：點數管理',b:'左側點選「點數管理」查看發放明細、分析數據與設定。',id:'navPt',side:'right',view:null,tab:null},
+  // 7–9：點數管理三個 tab
+  {s:'7/9',t:'點數管理：發放明細',b:'每筆符合回饋資格的訂單都記錄在這裡，可查詢<b>待發送、已發送、領取狀態</b>，並點擊單筆查看完整訂單詳情。',id:'tabDetail',side:'below',view:'pt',tab:'detail'},
+  {s:'8/9',t:'點數管理：點數分析',b:'查看點數<b>發放趨勢、領取率</b>與活動效益比較，以 KPI 卡片與圖表呈現，協助評估活動成效。',id:'tabAnal',side:'below',view:'pt',tab:'anal'},
+  {s:'9/9',t:'點數管理：餘額與設定',b:'在這裡<b>申請儲值點數</b>，並隨時調整基本設定（發點基準、延遲天數、通知偏好等）。',id:'tabSet',side:'below',view:'pt',tab:'set'},
 ];
-
 let ti=0;
-function startTut(){ ti=0; document.getElementById('tut').classList.add('on'); renderTut(); }
-function restartTut(){ document.getElementById('helpMenu').classList.remove('open'); startTut(); }
-function endTut(){ document.getElementById('tut').classList.remove('on'); go('cp'); }
-
-function moveTut(d){
-  const nx=ti+d;
-  if(nx<0||nx>=STEPS.length){if(nx>=STEPS.length)endTut();return;}
-  ti=nx; renderTut();
-}
-
+function startTut(){ti=0;document.getElementById('tut').classList.add('on');renderTut();}
+function restartTut(){document.getElementById('hMenu').classList.remove('open');startTut();}
+function endTut(){document.getElementById('tut').classList.remove('on');go('cp');}
+function moveTut(d){const nx=ti+d;if(nx<0||nx>=STEPS.length){if(nx>=STEPS.length)endTut();return;}ti=nx;renderTut();}
 function renderTut(){
   const s=STEPS[ti];
-  if(s.view) go(s.view);
-  if(s.tab) goTab(s.tab);
-  document.getElementById('tutStep').textContent='第 '+s.label+' 步';
-  document.getElementById('tutTitle').textContent=s.title;
-  document.getElementById('tutBody').innerHTML=s.body;
-  document.getElementById('tutBack').style.display=ti===0?'none':'inline-flex';
-  document.getElementById('tutNext').textContent=ti===STEPS.length-1?'完成 ✓':'下一步 →';
-  document.getElementById('tutDots').innerHTML=STEPS.map((_,i)=>`<span class="${i===ti?'on':''}"></span>`).join('');
-
+  if(s.view)go(s.view);
+  if(s.tab)goTab(s.tab);
+  document.getElementById('tStep').textContent='第 '+s.s+' 步';
+  document.getElementById('tTitle').textContent=s.t;
+  document.getElementById('tBody').innerHTML=s.b;
+  document.getElementById('tBack').style.display=ti===0?'none':'inline-flex';
+  document.getElementById('tNext').textContent=ti===STEPS.length-1?'完成 ✓':'下一步 →';
+  document.getElementById('tDots').innerHTML=STEPS.map((_,i)=>`<span class="${i===ti?'on':''}"></span>`).join('');
   requestAnimationFrame(()=>{
-    const el=document.getElementById(s.tid);
+    const el=document.getElementById(s.id);
     if(!el){document.getElementById('spot').style.display='none';return;}
     document.getElementById('spot').style.display='';
-    const r=el.getBoundingClientRect(), pad=5;
+    const r=el.getBoundingClientRect(),pad=5;
     const sp=document.getElementById('spot');
-    sp.style.left=(r.left-pad)+'px'; sp.style.top=(r.top-pad)+'px';
-    sp.style.width=(r.width+pad*2)+'px'; sp.style.height=(r.height+pad*2)+'px';
-
-    const tc=document.getElementById('tutCard');
-    const arr=document.getElementById('tutArr');
-    arr.className='tut-arrow';
-    const TW=300, gap=14;
+    sp.style.left=(r.left-pad)+'px';sp.style.top=(r.top-pad)+'px';sp.style.width=(r.width+pad*2)+'px';sp.style.height=(r.height+pad*2)+'px';
+    const tc=document.getElementById('tc'),arr=document.getElementById('tArr');
+    arr.className='tarr';
+    const TW=290,gap=12;
     if(s.side==='right'){
-      tc.style.cssText=`left:${r.right+gap}px;top:${Math.max(8,r.top)}px;transform:none`;
-      arr.classList.add('arr-left');
-    } else if(s.side==='below'){
-      let lx=r.left; if(lx+TW>window.innerWidth-12)lx=window.innerWidth-TW-12;
-      tc.style.cssText=`left:${lx}px;top:${r.bottom+gap}px;transform:none`;
-      arr.classList.add('arr-top');
-    } else { // above
-      let lx=r.left; if(lx+TW>window.innerWidth-12)lx=window.innerWidth-TW-12;
-      tc.style.cssText=`left:${lx}px;top:${r.top-200-gap}px;transform:none`;
-      arr.classList.add('arr-bottom');
+      tc.style.cssText=`left:${r.right+gap}px;top:${Math.max(8,r.top)}px;transform:none`;arr.classList.add('arr-l');
+    } else {
+      // below — clamp to viewport
+      let lx=r.left;if(lx+TW>window.innerWidth-12)lx=window.innerWidth-TW-12;if(lx<8)lx=8;
+      tc.style.cssText=`left:${lx}px;top:${r.bottom+gap}px;transform:none`;arr.classList.add('arr-t');
     }
   });
 }
 
-// ─── Help menu ─────────────────────────────────
-document.getElementById('helpBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpMenu').classList.toggle('open');});
-document.addEventListener('click',()=>document.getElementById('helpMenu').classList.remove('open'));
+// ── Help menu ──
+document.getElementById('hBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('hMenu').classList.toggle('open');});
+document.addEventListener('click',()=>document.getElementById('hMenu').classList.remove('open'));
 window.addEventListener('resize',()=>{if(document.getElementById('tut').classList.contains('on'))renderTut();});
 
-// ─── Init ──────────────────────────────────────
+// Init
 toStep(1);
 </script>
 </body>
