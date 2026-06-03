@@ -270,19 +270,20 @@
   .pop-box .lbl{display:block;font-weight:600;margin-top:6px;color:#FCD34D}
   .pop-box .lbl:first-child{margin-top:0}
 
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+  .seg-btn{border:none;border-right:1px solid var(--border);background:#fff;color:var(--text-3);font-size:13px;padding:6px 14px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .1s,color .1s}
+  .seg-btn:last-child{border-right:none}
+  .seg-btn.sel{background:#EFF6FF;color:var(--primary);font-weight:500}
+  .seg-btn:hover:not(.sel){background:#F9FAFB;color:var(--text-2)}
+  .fh-label{flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px}
+  .fh-input{flex:1;min-width:0;padding:6px 0}
+  .section-div{border:none;border-top:1px solid #F3F4F6;margin:14px 0}
+
   /* 警示勾選同意 */
   .agree-box{margin-top:18px;padding:14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px}
   .agree-box label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
   .agree-box input[type="checkbox"]{margin-top:3px;flex-shrink:0}
   .agree-box .agree-text{font-size:13px;color:#92400E;line-height:1.65}
-
-  /* 拖曳排序 handle + 序號 input */
-  .drag-handle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:24px;color:var(--text-3);cursor:grab;user-select:none;font-size:14px;line-height:1}
-  .drag-handle:hover{color:var(--text-1)}
-  tr.dragging{opacity:.4}
-  tr.drag-over td{border-top:2px solid var(--primary)}
-  .order-input{width:48px;padding:4px 6px;text-align:center;font-size:12px;border:1px solid var(--border);border-radius:4px;background:#fff}
-  .order-cell{display:flex;align-items:center;gap:6px}
 
   /* SVG 折線圖 */
   .linechart{width:100%;height:240px}
@@ -336,7 +337,8 @@
         <div class="nav-sub">
           <div class="nav-item active" data-view="dashboard">回饋總覽</div>
           <div class="nav-item" data-view="campaigns">回饋活動</div>
-          <div class="nav-item" data-view="points">點數管理</div>
+          <div class="nav-item" data-view="ledger">發放明細</div>
+          <div class="nav-item" data-view="analysis">點數分析</div>
         </div>
       </div>
       <div class="nav-item nav-disabled">🧩 其他應用</div>
@@ -517,19 +519,6 @@
           <table>
             <thead>
               <tr>
-                <th style="width:90px">
-                  <span style="display:inline-flex;align-items:center;gap:4px">
-                    排序
-                    <span class="pop-wrap"><span class="pop-ic">?</span>
-                      <span class="pop-box down">
-                        <span class="lbl">活動衝突優先序</span>
-                        當同一品項被多條進行中活動涵蓋時，系統將依此排序判斷適用順序，數字越小者優先發放。<br>
-                        <span class="lbl">調整方式</span>
-                        ① 拖曳左側「⋮⋮」手把調整位置　② 或直接於序號欄位輸入數字後 Enter 套用。
-                      </span>
-                    </span>
-                  </span>
-                </th>
                 <th class="sortable" onclick="sortCampaigns('name')">活動名稱 <span class="sort-ic" id="cic-name">↕</span></th>
                 <th class="sortable" onclick="sortCampaigns('scope')">回饋條件 <span class="sort-ic" id="cic-scope">↕</span></th>
                 <th class="sortable" onclick="sortCampaigns('mode')">回饋方式 <span class="sort-ic" id="cic-mode">↕</span></th>
@@ -550,28 +539,15 @@
         </div>
       </div>
 
-      <!-- ============== VIEW: 點數管理 ============== -->
-      <div class="view" id="view-points">
+      <!-- ============== VIEW: 發放明細 ============== -->
+      <div class="view" id="view-ledger">
         <div class="page-head">
           <div>
-            <h1 class="page-title">點數管理</h1>
-            <p class="page-desc">查看 LINE POINTS 發放明細、點數分析與服務設定。</p>
+            <h1 class="page-title">發放明細</h1>
+            <p class="page-desc">查看 LINE POINTS 發放紀錄與領取狀態。</p>
           </div>
-          <div style="display:flex;gap:10px;align-items:center">
-            <span class="upd-stamp" id="upd-stamp-2"></span>
-            <span class="date-pill">📅 2026/04/20 - 2026/05/19 ▾</span>
-          </div>
+          <span class="upd-stamp" id="upd-stamp-2"></span>
         </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-          <div class="tab active" data-tab="ledger">發放明細</div>
-          <div class="tab" data-tab="analysis">點數分析</div>
-          <div class="tab" data-tab="settings">餘額與設定</div>
-        </div>
-
-        <!-- Tab: 發放明細 -->
-        <div class="tab-pane" id="tab-ledger">
           <div class="card table-card">
             <div class="filter-bar">
               <div class="filter-inline">
@@ -581,8 +557,12 @@
                 <input class="input" type="date" value="2026-05-31"/>
               </div>
               <div class="filter-inline">
-                <label>狀態</label>
+                <label>領取狀態</label>
                 <select class="select" id="f-status"><option>全部</option><option>未領取</option><option>已領取</option><option>已過期</option></select>
+              </div>
+              <div class="filter-inline">
+                <label>發放狀態</label>
+                <select class="select" id="f-disp-status"><option>全部</option><option>待發放</option><option>已發放</option><option>不發放</option><option>暫停發放</option></select>
               </div>
               <div class="filter-inline">
                 <label>回饋活動</label>
@@ -606,7 +586,8 @@
                   <th class="sortable" onclick="sortLedger('member')">會員 <span class="sort-ic" id="ic-member">↕</span></th>
                   <th class="sortable" onclick="sortLedger('activity')">回饋活動 <span class="sort-ic" id="ic-activity">↕</span></th>
                   <th class="sortable" onclick="sortLedger('points')">點數 <span class="sort-ic" id="ic-points">↕</span></th>
-                  <th class="sortable" onclick="sortLedger('status')">狀態 <span class="sort-ic" id="ic-status">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('dispStatus')">發放狀態 <span class="sort-ic" id="ic-dispStatus">↕</span></th>
+                  <th class="sortable" onclick="sortLedger('status')">領取狀態 <span class="sort-ic" id="ic-status">↕</span></th>
                   <th class="sortable" onclick="sortLedger('claimedAt')">領取時間 <span class="sort-ic" id="ic-claimedAt">↕</span></th>
                   <th class="sortable" onclick="sortLedger('expiresAt')">到期時間 <span class="sort-ic" id="ic-expiresAt">↕</span></th>
                 </tr>
@@ -622,14 +603,35 @@
               </div>
             </div>
           </div>
+      </div>
+
+      <!-- ============== VIEW: 點數分析 ============== -->
+      <div class="view" id="view-analysis">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">點數分析</h1>
+            <p class="page-desc">查看 LINE POINTS 發放與領取趨勢分析。</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span class="date-pill">📅 2026/04/20 - 2026/05/19 ▾</span>
+            <button class="btn sm">匯出</button>
+          </div>
         </div>
 
-        <!-- Tab: 點數分析（點數視角 dashboard） -->
-        <div class="tab-pane" id="tab-analysis" style="display:none">
+          <!-- 頂部資訊卡：本月固定，無備註 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;align-items:stretch">
+            <div class="card" style="padding:18px 20px">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月已發放點數</div>
+              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">12,850 <span style="font-size:14px;font-weight:400">點</span></div>
+            </div>
+            <div class="card" style="padding:18px 20px">
+              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月點數費用估算</div>
+              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">NT$16,705</div>
+            </div>
+          </div>
 
-          <!-- 點數發放分析（仿附圖：左 4 stats + 右月度柱狀圖，當月有色其餘淺灰） -->
+          <!-- 點數發放分析 -->
           <div class="card" style="margin-bottom:20px">
-            <h3 style="margin:0 0 16px;font-size:15px;font-weight:600">點數發放分析</h3>
             <div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
               <div>
                 <div style="margin-bottom:16px">
@@ -713,177 +715,6 @@
               <div class="bd-row"><span class="bd-name">春節短期加碼</span><span class="bd-pct"><span class="bd-bar-wrap"><span class="bd-bar" style="width:55%;background:#F59E0B"></span></span><span class="bd-val">55%</span></span></div>
             </div>
           </div>
-        </div>
-
-        <!-- Tab: 儲值與設定 -->
-        <div class="tab-pane" id="tab-settings" style="display:none">
-
-          <!-- 頂部資訊卡：目前可用點數 / 本月預支點數 / 本月已發放 -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;align-items:stretch">
-            <!-- 目前可用點數（含操作按鈕） -->
-            <div class="card" style="padding:18px 20px;border-color:var(--primary);background:#F0F7FF">
-              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">目前可用點數</div>
-              <div style="font-size:28px;font-weight:700;color:var(--primary);line-height:1.2">38,560</div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px;margin-bottom:14px">最近一次儲值：2026-05-12 | 10,000 點</div>
-              <div style="display:flex;gap:8px">
-                <button class="btn primary sm" style="white-space:nowrap">＋ 申請儲值</button>
-                <button class="btn sm" style="white-space:nowrap">儲值紀錄</button>
-              </div>
-            </div>
-            <!-- 本月預支點數 -->
-            <div class="card" style="padding:18px 20px">
-              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月預支點數</div>
-              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">0</div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px">點數餘額不足時自動預支</div>
-            </div>
-            <!-- 本月已發放 -->
-            <div class="card" style="padding:18px 20px">
-              <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">本月已發放</div>
-              <div style="font-size:28px;font-weight:700;color:var(--text-1);line-height:1.2">12,850</div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px">月結預計：NT$12,850</div>
-            </div>
-          </div>
-
-          <!-- ① 預支結算 -->
-          <div class="set-card">
-            <div class="set-card-head">
-              <h3>預支結算</h3>
-            </div>
-            <div class="set-card-body">
-              <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin:0 0 14px;padding-bottom:14px;border-bottom:1px dashed #F0F0F0">點數餘額不足時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，系統將自動預支點數完成發放，並於每月進行結算。</p>
-              <div class="set-row">
-                <div class="set-key">結算週期</div>
-                <div class="set-val">每月 1 日結算上月預支點數用量，付款期限為帳單寄出後 7 個工作日</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ② 通知偏好 -->
-          <div class="set-card">
-            <div class="set-card-head">
-              <h3>通知偏好</h3>
-              <button class="btn sm">儲存變更</button>
-            </div>
-            <div class="set-card-body">
-              <!-- 點數餘額 group -->
-              <div style="margin-bottom:12px;padding-bottom:14px;border-bottom:1px solid var(--border)">
-                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">點數餘額</div>
-                <div class="set-row">
-                  <div class="set-key">即將用罄通知</div>
-                  <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-                    <label class="toggle" title="此通知為強制啟用，無法關閉"><input type="checkbox" checked disabled><span class="slider"></span></label>
-                    <span>啟用</span>
-                    <span style="font-size:11px;color:var(--text-3);background:#F3F4F6;padding:2px 7px;border-radius:10px">強制啟用</span>
-                  </div>
-                </div>
-                <div class="set-row">
-                  <div class="set-key">通知門檻</div>
-                  <div class="set-val" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-                    已使用達 <input class="input" type="number" value="80" min="50" max="100" style="width:64px;padding:4px 8px;text-align:center"> % 時通知
-                  </div>
-                </div>
-              </div>
-              <!-- 活動預算 group -->
-              <div style="margin-bottom:12px;padding-bottom:14px;border-bottom:1px solid var(--border)">
-                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">活動預算</div>
-                <div class="set-row">
-                  <div class="set-key">即將用罄通知</div>
-                  <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-                    <label class="toggle"><input type="checkbox" checked id="notif-activity-toggle" onchange="document.getElementById('notif-activity-threshold').style.opacity=this.checked?'1':'0.4'"><span class="slider"></span></label>
-                    <span id="notif-activity-label">啟用</span>
-                  </div>
-                </div>
-                <div class="set-row" id="notif-activity-threshold">
-                  <div class="set-key">通知門檻</div>
-                  <div class="set-val" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-                    已使用達 <input class="input" type="number" value="90" min="50" max="100" style="width:64px;padding:4px 8px;text-align:center"> % 時通知
-                  </div>
-                </div>
-              </div>
-              <!-- 通知信箱 -->
-              <div class="set-row">
-                <div class="set-key">通知信箱</div>
-                <div class="set-val" style="text-align:left">
-                  <input class="input" type="email" placeholder="例：marketing@yourstore.com" value="marketing@yourstore.com" style="width:100%"/>
-                  <div class="hint" style="margin-top:6px">行銷與財務收件可能不同，請填寫專用接收信箱。</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ③ LINE OA 整合 -->
-          <div class="set-card">
-            <div class="set-card-head">
-              <h3>LINE OA 整合</h3>
-              <button class="btn sm" onclick="saveLineOA()">儲存變更</button>
-            </div>
-            <div class="set-card-body">
-              <div class="set-row">
-                <div class="set-key">啟用 LINE OA 傳點</div>
-                <div class="set-val" style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-                  <label class="toggle"><input type="checkbox" id="lineoa-toggle" onchange="onLineOAToggle(this)"><span class="slider"></span></label>
-                  <span id="lineoa-status-label">關閉</span>
-                </div>
-              </div>
-              <!-- Token 欄位（啟用才顯示） -->
-              <div class="set-row" id="lineoa-token-row" style="display:none">
-                <div class="set-key">LINE Channel<br>Access Token</div>
-                <div class="set-val" style="text-align:left">
-                  <input class="input" type="password" id="lineoa-token-input" placeholder="貼上 LINE Messaging API Channel Access Token" style="width:100%;font-family:monospace"/>
-                  <div class="hint" style="margin-top:6px">取得方式：<a href="#" style="color:var(--primary)">LINE Developers Console ↗</a></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LINE OA 同意 Popover Modal -->
-          <div class="modal-back layer-2" id="modal-lineoa-agree">
-            <div class="modal sm">
-              <div class="modal-head">
-                <h3 class="t">啟用 LINE OA 整合</h3>
-                <button class="modal-close" onclick="cancelLineOA()">×</button>
-              </div>
-              <div class="modal-body">
-                <p style="font-size:14px;color:var(--text-1);margin:0 0 12px">啟用後，系統將透過您的 LINE OA 傳送點數連結給消費者。</p>
-                <div class="info-line" style="margin-bottom:0">
-                  ⚠️ 若 LINE OA 訊息發送量超過 LINE 免費額度，將產生<strong>訊息費用</strong>，該費用由 LINE 直接向您收取，與本服務無關，非本公司收取。
-                </div>
-              </div>
-              <div class="modal-foot">
-                <button class="btn" onclick="cancelLineOA()">取消</button>
-                <button class="btn primary" onclick="confirmLineOA()">確認同意</button>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- ④ 服務資訊 -->
-          <div class="set-card">
-            <div class="set-card-head">
-              <h3>服務資訊</h3>
-            </div>
-            <div class="set-card-body">
-              <div class="set-row">
-                <div class="set-key">公司名稱</div>
-                <div class="set-val">睿鼎數位股份有限公司</div>
-              </div>
-              <div class="set-row">
-                <div class="set-key">公司統編</div>
-                <div class="set-val">42837620</div>
-              </div>
-              <div class="set-row">
-                <div class="set-key">服務電話</div>
-                <div class="set-val">02-23960089</div>
-              </div>
-              <div class="set-row">
-                <div class="set-key">服務時間</div>
-                <div class="set-val">週一到週五 10:00 - 17:00</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
       </div>
 
     </div>
@@ -901,136 +732,145 @@
 
       <!-- 活動名稱 -->
       <div class="form-h">
-        <label>活動名稱 <span class="req">*</span></label>
-        <div class="form-h-input">
+        <div class="fh-label">活動名稱 <span class="req">*</span></div>
+        <div class="fh-input">
           <input class="input" id="f-name" placeholder="例：聖誕禮品季 - 全站底"/>
         </div>
       </div>
+      <hr class="section-div">
 
       <!-- 回饋條件 -->
       <div class="form-h">
-        <label>回饋條件 <span class="req">*</span></label>
-        <div class="form-h-input">
-          <select class="select" id="f-scope" onchange="onScopeChange()" style="max-width:240px">
-            <option value="all">所有訂單</option>
-            <option value="orderprice">訂單滿額</option>
-            <option value="category">指定分類</option>
-            <option value="product">指定品項</option>
-          </select>
-          <div id="threshold-wrap" style="display:none;margin-top:10px;align-items:center;gap:6px">
-            <span style="font-size:13px;color:var(--text-2)">滿額門檻：</span>
-            <input class="input" type="number" placeholder="500" style="width:120px"/>
-            <span style="font-size:13px">元</span>
-            <span class="pop-wrap"><span class="pop-ic">?</span>
-              <span class="pop-box">「訂單總額」不扣除全站折扣。<br>例：訂單總額 500 元，全站折扣 9 折，結帳金額 450 元。以訂單總額 500 元判斷是否符合滿額門檻。</span>
-            </span>
+        <div class="fh-label">回饋條件 <span class="req">*</span></div>
+        <div class="fh-input">
+          <div class="seg" id="scope-seg">
+            <button class="seg-btn sel" onclick="selScope('all')">所有訂單</button>
+            <button class="seg-btn" onclick="selScope('orderprice')">訂單滿額</button>
+            <button class="seg-btn" onclick="selScope('category')">指定分類</button>
+            <button class="seg-btn" onclick="selScope('product')">指定品項</button>
+          </div>
+          <div style="display:none;margin-top:10px" id="ext-threshold">
+            <div class="inline-suffix">
+              <input class="input" type="number" id="f-threshold" placeholder="500" min="1" style="width:120px"/>
+              <span style="font-size:13px;color:var(--text-2)">元</span>
+              <span class="pop-wrap" style="margin-left:4px"><span class="pop-ic">?</span>
+                <span class="pop-box">「訂單總額」不扣除全站折扣。<br>例：訂單總額 500 元，全站折扣 9 折，結帳金額 450 元。以訂單總額 500 元判斷是否符合滿額門檻。</span>
+              </span>
+            </div>
+          </div>
+          <div class="range-section" id="range-category">
+            <div class="field">
+              <label>已選分類</label>
+              <div class="chip-row" id="cat-chips">
+                <span class="chip">3C 用品 <span class="x" onclick="this.parentElement.remove()">×</span></span>
+                <span class="chip">禮品禮盒 <span class="x" onclick="this.parentElement.remove()">×</span></span>
+              </div>
+              <button class="btn sm" onclick="openModal('modal-cat-picker')" style="margin-top:6px">+ 加入分類</button>
+              <div class="hint">⚠ 若選擇全部分類將自動切換為「所有訂單」</div>
+            </div>
+          </div>
+          <div class="range-section" id="range-product">
+            <div class="field">
+              <label>已選商品</label>
+              <div class="chip-row" id="prd-chips">
+                <span class="chip">AROMASE 5α 洗髮精 200ml <span class="x" onclick="this.parentElement.remove()">×</span></span>
+              </div>
+              <button class="btn sm" onclick="openModal('modal-prd-picker')" style="margin-top:6px">+ 加入商品</button>
+              <div class="hint">⚠ 若選擇全部商品將自動切換為「所有訂單」</div>
+            </div>
           </div>
         </div>
       </div>
+      <hr class="section-div">
 
-      <!-- 範圍 picker：分類 / 品項 -->
-      <div class="range-section" id="range-category">
-        <div class="field">
-          <label>已選分類</label>
-          <div class="chip-row" id="cat-chips">
-            <span class="chip">3C 用品 <span class="x" onclick="this.parentElement.remove()">×</span></span>
-            <span class="chip">禮品禮盒 <span class="x" onclick="this.parentElement.remove()">×</span></span>
-          </div>
-          <button class="btn sm" onclick="openModal('modal-cat-picker')" style="margin-top:6px">+ 加入分類</button>
-          <div class="hint">⚠ 若選擇全部分類將自動切換為「所有訂單」</div>
-        </div>
-      </div>
-      <div class="range-section" id="range-product">
-        <div class="field">
-          <label>已選商品</label>
-          <div class="chip-row" id="prd-chips">
-            <span class="chip">AROMASE 5α 洗髮精 200ml <span class="x" onclick="this.parentElement.remove()">×</span></span>
-          </div>
-          <button class="btn sm" onclick="openModal('modal-prd-picker')" style="margin-top:6px">+ 加入商品</button>
-          <div class="hint">⚠ 若選擇全部商品將自動切換為「所有訂單」</div>
-        </div>
-      </div>
-
-      <!-- 回饋方式 + 回饋數值 並排 -->
+      <!-- 回饋方式 -->
       <div class="form-h">
-        <label>回饋方式 <span class="req">*</span></label>
-        <div class="form-h-input" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-          <div class="radio-group" style="padding:0;gap:14px">
-            <label class="check-row">
-              <input type="radio" name="rwd-mode" value="pct" checked onchange="onRwdModeChange()">
-              依比例
-              <span class="pop-wrap"><span class="pop-ic">?</span>
+        <div class="fh-label">回饋方式 <span class="req">*</span></div>
+        <div class="fh-input">
+          <div class="seg" id="mode-seg">
+            <button class="seg-btn sel" onclick="selMode('pct')">依比例</button>
+            <button class="seg-btn" onclick="selMode('fix')">固定數值</button>
+          </div>
+          <div id="ext-pct" style="margin-top:10px">
+            <div class="inline-suffix">
+              <input class="input" type="number" id="f-pct" placeholder="3" step="0.1" min="0.1" max="100" style="width:90px"/>
+              <span style="font-size:13px;color:var(--text-2)">%</span>
+              <span class="pop-wrap" style="margin-left:4px"><span class="pop-ic">?</span>
                 <span class="pop-box" id="rwd-tip-text"></span>
               </span>
-            </label>
-            <label class="check-row">
-              <input type="radio" name="rwd-mode" value="fix" onchange="onRwdModeChange()">
-              固定數值
-            </label>
+            </div>
           </div>
-          <!-- 回饋數值（動態） -->
-          <div id="rwd-pct-wrap" class="inline-suffix">
-            <input class="input" type="number" placeholder="3" step="0.1" min="0.1" max="100" style="width:90px"/>
-            <span>%</span>
-            <span class="hint-inline">建議 1–10%</span>
-          </div>
-          <div id="rwd-fix-wrap" class="inline-suffix" style="display:none">
-            <input class="input" type="number" placeholder="50" min="1" max="1000" style="width:90px"/>
-            <span>點</span>
-            <span class="hint-inline">單次發點上限 1,000 點</span>
+          <div id="ext-fix" style="display:none;margin-top:10px">
+            <div class="inline-suffix">
+              <input class="input" type="number" id="f-fix" placeholder="50" min="1" style="width:90px"/>
+              <span style="font-size:13px;color:var(--text-2)">點</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- 單筆回饋上限（依比例時顯示） -->
+      <div class="form-h" id="rwd-cap-row">
+        <div class="fh-label">單筆回饋上限 <span class="req">*</span></div>
+        <div class="fh-input">
+          <div class="seg" id="cap-seg">
+            <button class="seg-btn sel" onclick="selCap('y')">有上限</button>
+            <button class="seg-btn" onclick="selCap('n')">無上限</button>
+          </div>
+          <div id="ext-cap" style="margin-top:10px">
+            <div class="inline-suffix">
+              <input class="input" type="number" id="f-cap" placeholder="500" min="1" style="width:120px"/>
+              <span style="font-size:13px;color:var(--text-2)">點</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="section-div">
 
       <!-- 回饋預算 -->
       <div class="form-h">
-        <label>回饋預算 <span class="req">*</span></label>
-        <div class="form-h-input">
+        <div class="fh-label">回饋預算 <span class="req">*</span></div>
+        <div class="fh-input">
           <div class="inline-suffix">
-            <input class="input" type="number" placeholder="3000" style="width:160px"/>
-            <span>點</span>
+            <input class="input" type="number" id="f-budget" placeholder="3000" min="1" style="width:160px"/>
+            <span style="font-size:13px;color:var(--text-2)">點</span>
           </div>
-          <div class="hint" style="margin-top:6px">預算用罄後系統自動停止露出並通知，<a href="#" onclick="gotoSettingsFromModal();return false" style="color:var(--primary)">前往開啟即將用罄通知 ↗</a></div>
+          <div class="hint" style="margin-top:6px">預算用罄後系統自動停止露出並發送通知；達 80% 時將提前寄送通知信。</div>
         </div>
       </div>
+      <hr class="section-div">
 
-      <!-- 起始時間 / 結束時間 對齊並排 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div>
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <label style="flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px;display:flex;align-items:center;gap:4px">起始時間 <span class="req">*</span></label>
-            <div style="flex:1;min-width:0">
-              <div class="radio-group" style="padding:0;margin-bottom:8px;height:30px">
-                <label class="check-row"><input type="radio" name="start-mode" value="now" checked onchange="onStartModeChange()"> 立即啟用</label>
-                <label class="check-row"><input type="radio" name="start-mode" value="schedule" onchange="onStartModeChange()"> 排程啟用</label>
-              </div>
-              <input class="input" type="datetime-local" id="f-start" value="2026-05-19T00:00" disabled/>
-            </div>
+      <!-- 起始時間 -->
+      <div class="form-h">
+        <div class="fh-label">起始時間 <span class="req">*</span></div>
+        <div class="fh-input">
+          <div class="seg" id="start-seg">
+            <button class="seg-btn sel" onclick="selStart('now')">立即啟用</button>
+            <button class="seg-btn" onclick="selStart('schedule')">排程啟用</button>
           </div>
-        </div>
-        <div>
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <label style="flex-shrink:0;width:96px;font-size:13px;font-weight:500;color:var(--text-1);padding-top:8px;display:flex;align-items:center;gap:4px">結束時間 <span class="req">*</span></label>
-            <div style="flex:1;min-width:0">
-              <div style="height:30px;margin-bottom:8px"></div>
-              <input class="input" type="datetime-local" id="f-end" value="2026-06-30T23:59"/>
-            </div>
+          <div id="ext-start" style="display:none;margin-top:10px">
+            <input class="input" type="datetime-local" id="f-start" value="2026-06-15T00:00" style="width:220px"/>
           </div>
         </div>
       </div>
+      <hr class="section-div">
 
-      <!-- 注意事項勾選同意 -->
+      <!-- 結束時間 -->
+      <div class="form-h">
+        <div class="fh-label">結束時間 <span class="req">*</span></div>
+        <div class="fh-input" style="padding-top:6px">
+          <input class="input" type="datetime-local" id="f-end" value="2026-06-30T23:59" style="width:220px"/>
+        </div>
+      </div>
+
+      <!-- 同意 -->
       <div class="agree-box">
-        <div style="font-size:13px;font-weight:600;color:#92400E;margin-bottom:10px">我同意為保障消費者權益：</div>
-        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:8px">
-          <input type="checkbox" id="f-agree-1" style="margin-top:3px;flex-shrink:0"/>
-          <span class="agree-text">回饋預算用罄時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，不受影響。</span>
-        </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-          <input type="checkbox" id="f-agree-2" style="margin-top:3px;flex-shrink:0"/>
-          <span class="agree-text">點數餘額不足時，前述符合回饋資格之訂單，系統將自動預支點數完成發放，並於每月進行結算。</span>
+        <label>
+          <input type="checkbox" id="f-agree-1"/>
+          <span class="agree-text">我同意：回饋預算用罄時，已成立且符合回饋資格之訂單，仍依原規則正常發放回饋點數，不受影響。</span>
         </label>
       </div>
+
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('modal-campaign')">取消</button>
@@ -1126,34 +966,6 @@
 </div>
 
 <script>
-  /* ===== LINE OA Toggle ===== */
-  function onLineOAToggle(input){
-    if(input.checked){
-      input.checked = false; // 先取消，等確認後再啟用
-      openModal('modal-lineoa-agree');
-    } else {
-      document.getElementById('lineoa-status-label').textContent = '關閉';
-      document.getElementById('lineoa-token-row').style.display = 'none';
-    }
-  }
-  function cancelLineOA(){
-    document.getElementById('lineoa-toggle').checked = false;
-    closeModal('modal-lineoa-agree');
-  }
-  function confirmLineOA(){
-    document.getElementById('lineoa-toggle').checked = true;
-    document.getElementById('lineoa-status-label').textContent = '啟用';
-    document.getElementById('lineoa-token-row').style.display = 'flex';
-    closeModal('modal-lineoa-agree');
-  }
-  function saveLineOA(){
-    alert('LINE OA 整合設定已儲存。');
-  }
-  /* 活動預算通知 toggle label */
-  document.addEventListener('DOMContentLoaded', function(){
-    const tog = document.getElementById('notif-activity-toggle');
-    if(tog) tog.addEventListener('change', function(){ document.getElementById('notif-activity-label').textContent = this.checked ? '啟用' : '關閉'; });
-  });
 
   /* ===== Date format helper: YYYY/MM/DD HH:MM AM/PM (12hr) ===== */
   function fmtDT(dStr){
@@ -1173,7 +985,7 @@
   document.querySelectorAll('[id^="upd-stamp"]').forEach(el=>el.textContent = '資料截至 ' + fmtDT(new Date()));
 
   /* ===== Nav ===== */
-  const navMap = {dashboard:'回饋總覽', campaigns:'回饋活動', points:'點數管理'};
+  const navMap = {dashboard:'回饋總覽', campaigns:'回饋活動', ledger:'發放明細', analysis:'點數分析'};
   function navTo(key){
     document.querySelectorAll('.nav-sub .nav-item').forEach(el=>el.classList.toggle('active', el.dataset.view===key));
     document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active', el.id==='view-'+key));
@@ -1253,21 +1065,7 @@
         ? `<button class="btn sm ghost danger" disabled title="進行中之活動不得刪除">刪除</button>`
         : `<button class="btn sm ghost danger" onclick="askDelete(${c.id},'${c.name.replace(/'/g,"\\'")}',${c.locked})">刪除</button>`;
       return `
-        <tr draggable="true" data-id="${c.id}"
-            ondragstart="onDragStart(event,${c.id})"
-            ondragover="onDragOver(event)"
-            ondragleave="onDragLeave(event)"
-            ondrop="onDrop(event,${c.id})"
-            ondragend="onDragEnd(event)">
-          <td>
-            <div class="order-cell">
-              <span class="drag-handle" title="拖曳調整排序">⋮⋮</span>
-              <input class="order-input" type="number" min="1" value="${c.order}"
-                onchange="onOrderInput(${c.id}, this.value)"
-                onclick="event.stopPropagation()"
-                ondragstart="event.preventDefault();event.stopPropagation()"/>
-            </div>
-          </td>
+        <tr data-id="${c.id}">
           <td class="cell-strong">${c.name}</td>
           <td>${scopeText}</td>
           <td>${c.mode}</td>
@@ -1306,49 +1104,6 @@
   }
   function gotoPage(p){ currentPage=p; renderCampaigns(); }
 
-  /* 拖曳調整排序 */
-  let dragSrcId = null;
-  function onDragStart(e,id){ dragSrcId=id; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
-  function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-  function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
-  function onDrop(e,targetId){
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    if(dragSrcId===null || dragSrcId===targetId) return;
-    const src = campaigns.find(c=>c.id===dragSrcId);
-    const tgt = campaigns.find(c=>c.id===targetId);
-    if(!src || !tgt) return;
-    // 把 src.order 設為 tgt.order，其餘順位重排
-    const srcOrder = src.order, tgtOrder = tgt.order;
-    if(srcOrder < tgtOrder){
-      campaigns.forEach(c=>{ if(c.order>srcOrder && c.order<=tgtOrder) c.order--; });
-    }else{
-      campaigns.forEach(c=>{ if(c.order>=tgtOrder && c.order<srcOrder) c.order++; });
-    }
-    src.order = tgtOrder;
-    // 拖曳後切回手動排序模式
-    cSortKey = null;
-    renderCampaigns();
-  }
-  function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragSrcId=null; document.querySelectorAll('#view-campaigns tr').forEach(tr=>tr.classList.remove('drag-over')); }
-  function onOrderInput(id, val){
-    const v = parseInt(val,10);
-    if(isNaN(v) || v<1){ renderCampaigns(); return; }
-    const max = campaigns.length;
-    const target = Math.min(Math.max(v,1), max);
-    const src = campaigns.find(c=>c.id===id);
-    if(!src) return;
-    const srcOrder = src.order;
-    if(target===srcOrder){ renderCampaigns(); return; }
-    if(srcOrder < target){
-      campaigns.forEach(c=>{ if(c.order>srcOrder && c.order<=target) c.order--; });
-    }else{
-      campaigns.forEach(c=>{ if(c.order>=target && c.order<srcOrder) c.order++; });
-    }
-    src.order = target;
-    cSortKey = null;
-    renderCampaigns();
-  }
   renderCampaigns();
 
   function onToggleCampaign(input, id){
@@ -1386,15 +1141,10 @@
     editingId = null;
     document.getElementById('campaign-modal-title').textContent = '新增回饋活動';
     document.getElementById('f-name').value = '';
-    document.getElementById('f-scope').value = 'all';
-    document.querySelector('input[name="start-mode"][value="now"]').checked = true;
-    document.querySelector('input[name="rwd-mode"][value="pct"]').checked = true;
     document.getElementById('f-agree-1').checked = false;
-    document.getElementById('f-agree-2').checked = false;
-    onScopeChange(); onStartModeChange(); onRwdModeChange();
-    ['f-name','f-scope','f-start','f-end'].forEach(id=>document.getElementById(id).disabled=false);
-    document.querySelectorAll('input[name="rwd-mode"]').forEach(r=>r.disabled=false);
-    document.querySelectorAll('input[name="start-mode"]').forEach(r=>r.disabled=false);
+    selScope('all'); selMode('pct'); selStart('now'); selCap('y');
+    ['f-name','f-start','f-end'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=false; });
+    document.querySelectorAll('#scope-seg .seg-btn, #mode-seg .seg-btn, #start-seg .seg-btn').forEach(b=>b.disabled=false);
     openModal('modal-campaign');
   }
   function openEditCampaign(id){
@@ -1402,38 +1152,46 @@
     const c = campaigns.find(x=>x.id===id);
     document.getElementById('campaign-modal-title').textContent = `編輯回饋活動 — ${c.name}`;
     document.getElementById('f-name').value = c.name;
-    document.getElementById('f-scope').value = (c.scope==='全站'?'all':(c.scope==='指定分類'?'category':'product'));
-    document.getElementById('f-start').value = c.start;
     document.getElementById('f-end').value = c.end;
     document.getElementById('f-agree-1').checked = true;
-    document.getElementById('f-agree-2').checked = true;
-    onScopeChange(); onRwdModeChange();
+    selScope(c.scope==='全站'?'all':(c.scope==='指定分類'?'category':'product'));
+    selMode('pct'); selStart('schedule');
+    document.getElementById('f-start').value = c.start;
     const lock = c.locked;
-    document.getElementById('f-scope').disabled = lock;
     document.getElementById('f-start').disabled = lock;
-    document.querySelectorAll('input[name="rwd-mode"]').forEach(r=>r.disabled = lock);
-    document.querySelectorAll('input[name="start-mode"]').forEach(r=>r.disabled = lock);
+    document.querySelectorAll('#scope-seg .seg-btn, #mode-seg .seg-btn, #start-seg .seg-btn').forEach(b=>b.disabled=lock);
     openModal('modal-campaign');
   }
-  function onScopeChange(){
-    const v = document.getElementById('f-scope').value;
-    document.getElementById('range-category').classList.toggle('show', v==='category');
-    document.getElementById('range-product').classList.toggle('show', v==='product');
-    document.getElementById('threshold-wrap').style.display = (v==='orderprice') ? 'flex' : 'none';
+  function selScope(v){
+    document.querySelectorAll('#scope-seg .seg-btn').forEach((b,i)=>{
+      b.classList.toggle('sel',['all','orderprice','category','product'][i]===v);
+    });
+    document.getElementById('ext-threshold').style.display=(v==='orderprice')?'':'none';
+    document.getElementById('range-category').classList.toggle('show',v==='category');
+    document.getElementById('range-product').classList.toggle('show',v==='product');
     refreshRwdTip();
   }
-  function onStartModeChange(){
-    const v = document.querySelector('input[name="start-mode"]:checked').value;
-    document.getElementById('f-start').disabled = (v==='now');
-  }
-  function onRwdModeChange(){
-    const m = document.querySelector('input[name="rwd-mode"]:checked').value;
-    document.getElementById('rwd-pct-wrap').style.display = (m==='pct') ? 'inline-flex' : 'none';
-    document.getElementById('rwd-fix-wrap').style.display = (m==='fix') ? 'inline-flex' : 'none';
+  function selMode(v){
+    document.querySelectorAll('#mode-seg .seg-btn').forEach((b,i)=>b.classList.toggle('sel',['pct','fix'][i]===v));
+    document.getElementById('ext-pct').style.display=(v==='pct')?'':'none';
+    document.getElementById('ext-fix').style.display=(v==='fix')?'':'none';
+    document.getElementById('rwd-cap-row').style.display=(v==='pct')?'':'none';
     refreshRwdTip();
+  }
+  function selCap(v){
+    document.querySelectorAll('#cap-seg .seg-btn').forEach((b,i)=>b.classList.toggle('sel',['y','n'][i]===v));
+    document.getElementById('ext-cap').style.display=(v==='y')?'':'none';
+  }
+  function selStart(v){
+    document.querySelectorAll('#start-seg .seg-btn').forEach((b,i)=>b.classList.toggle('sel',['now','schedule'][i]===v));
+    const picker=document.getElementById('ext-start');
+    const inp=document.getElementById('f-start');
+    picker.style.display=(v==='schedule')?'':'none';
+    if(inp) inp.disabled=(v==='now');
   }
   function refreshRwdTip(){
-    const scope = document.getElementById('f-scope').value;
+    const idx = [...document.querySelectorAll('#scope-seg .seg-btn')].findIndex(b=>b.classList.contains('sel'));
+    const scope = ['all','orderprice','category','product'][idx] ?? 'all';
     const tip = document.getElementById('rwd-tip-text');
     if(!tip) return;
     let html='';
@@ -1446,22 +1204,9 @@
     }
     tip.innerHTML = html;
   }
-  function gotoSettingsFromModal(){
-    closeModal('modal-campaign');
-    navTo('points');
-    // 切到「儲值與設定」tab
-    setTimeout(()=>{
-      document.querySelectorAll('#view-points .tab').forEach(t=>{
-        const isSet = t.dataset.tab==='settings';
-        t.classList.toggle('active', isSet);
-      });
-      ['ledger','analysis','settings'].forEach(name=>{
-        document.getElementById('tab-'+name).style.display = (name==='settings') ? 'block':'none';
-      });
-    }, 50);
-  }
   function onCampaignSave(){
-    const startMode = document.querySelector('input[name="start-mode"]:checked').value;
+    const startSel = document.querySelector('#start-seg .seg-btn.sel');
+    const startMode = startSel ? (startSel.textContent.trim()==='立即啟用'?'now':'schedule') : 'now';
     if(startMode==='now' && editingId===null){
       showConfirm({
         title:'確認立即啟用？',
@@ -1547,29 +1292,18 @@
   function onPrdCheck(i,j,v){ prdData[i].items[j].sel=v; prdData[i].sel=prdData[i].items.filter(it=>it.sel).length; renderPrdPicker(); }
   renderPrdPicker();
 
-  /* ===== Tabs in 點數管理 ===== */
-  document.querySelectorAll('#view-points .tab').forEach(t=>{
-    t.addEventListener('click',()=>{
-      document.querySelectorAll('#view-points .tab').forEach(x=>x.classList.toggle('active', x===t));
-      const k = t.dataset.tab;
-      ['ledger','analysis','settings'].forEach(name=>{
-        document.getElementById('tab-'+name).style.display = (k===name ? 'block':'none');
-      });
-    });
-  });
-
   /* ===== Ledger (發放明細) with sorting + 點 row 開 detail ===== */
   const ledgerData = [
-    {sentAt:'2026-05-18T02:15', orderId:'SL2026051800123', member:'陳怡倫', email:'ch***@gmail.com', activity:'聖誕禮品季 - 全站底', points:26, status:'已領取', sBadge:'green', claimedAt:'2026-05-18T14:32', expiresAt:'2026-08-18T23:59', orderAmount:2580},
-    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700091', member:'林俊宇', email:'li***@gmail.com', activity:'3C 加碼回饋', points:128, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-17T23:59', orderAmount:3200},
-    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700088', member:'王雅芬', email:'wa***@gmail.com', activity:'熱銷洗髮系列', points:45, status:'已領取', sBadge:'green', claimedAt:'2026-05-17T09:11', expiresAt:'2026-08-17T23:59', orderAmount:1500},
-    {sentAt:'2026-05-16T02:15', orderId:'SL2026051600142', member:'吳怡仁', email:'wu***@yahoo.com.tw', activity:'聖誕禮品季 - 全站底', points:38, status:'已過期', sBadge:'red', claimedAt:null, expiresAt:'2026-05-12T23:59', orderAmount:3800},
-    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500098', member:'張育瑩', email:'ch***@gmail.com', activity:'3C 加碼回饋', points:192, status:'已領取', sBadge:'green', claimedAt:'2026-05-15T21:45', expiresAt:'2026-08-15T23:59', orderAmount:4800},
-    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500076', member:'李俊豪', email:'le***@gmail.com', activity:'熱銷洗髮系列', points:21, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-15T23:59', orderAmount:700},
-    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400055', member:'謝玟琪', email:'hs***@gmail.com', activity:'聖誕禮品季 - 全站底', points:52, status:'已領取', sBadge:'green', claimedAt:'2026-05-14T19:20', expiresAt:'2026-08-14T23:59', orderAmount:5200},
-    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400052', member:'黃志強', email:'hu***@gmail.com', activity:'夏日折扣加碼', points:38, status:'未領取', sBadge:'gray', claimedAt:null, expiresAt:'2026-08-14T23:59', orderAmount:1520},
-    {sentAt:'2026-05-13T02:15', orderId:'SL2026051300044', member:'葉淑芬', email:'ye***@gmail.com', activity:'會員回饋日', points:50, status:'已領取', sBadge:'green', claimedAt:'2026-05-13T12:08', expiresAt:'2026-08-13T23:59', orderAmount:980},
-    {sentAt:'2026-05-12T02:15', orderId:'SL2026051200031', member:'郭明翰', email:'ku***@gmail.com', activity:'3C 加碼回饋', points:96, status:'已領取', sBadge:'green', claimedAt:'2026-05-12T22:14', expiresAt:'2026-08-12T23:59', orderAmount:2400}
+    {sentAt:'2026-05-18T02:15', orderId:'SL2026051800123', member:'陳怡倫', email:'ch***@gmail.com', activity:'聖誕禮品季 - 全站底', points:26, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-18T14:32', expiresAt:'2026-08-18T23:59', orderAmount:2580},
+    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700091', member:'林俊宇', email:'li***@gmail.com', activity:'3C 加碼回饋', points:128, status:'未領取', sBadge:'gray', dispStatus:'已發放', dsBadge:'green', claimedAt:null, expiresAt:'2026-08-17T23:59', orderAmount:3200},
+    {sentAt:'2026-05-17T02:15', orderId:'SL2026051700088', member:'王雅芬', email:'wa***@gmail.com', activity:'熱銷洗髮系列', points:45, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-17T09:11', expiresAt:'2026-08-17T23:59', orderAmount:1500},
+    {sentAt:'2026-05-16T02:15', orderId:'SL2026051600142', member:'吳怡仁', email:'wu***@yahoo.com.tw', activity:'聖誕禮品季 - 全站底', points:38, status:'已過期', sBadge:'red', dispStatus:'已發放', dsBadge:'green', claimedAt:null, expiresAt:'2026-05-12T23:59', orderAmount:3800},
+    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500098', member:'張育瑩', email:'ch***@gmail.com', activity:'3C 加碼回饋', points:192, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-15T21:45', expiresAt:'2026-08-15T23:59', orderAmount:4800},
+    {sentAt:'2026-05-15T02:15', orderId:'SL2026051500076', member:'李俊豪', email:'le***@gmail.com', activity:'熱銷洗髮系列', points:21, status:'未領取', sBadge:'gray', dispStatus:'已發放', dsBadge:'green', claimedAt:null, expiresAt:'2026-08-15T23:59', orderAmount:700},
+    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400055', member:'謝玟琪', email:'hs***@gmail.com', activity:'聖誕禮品季 - 全站底', points:52, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-14T19:20', expiresAt:'2026-08-14T23:59', orderAmount:5200},
+    {sentAt:'2026-05-14T02:15', orderId:'SL2026051400052', member:'黃志強', email:'hu***@gmail.com', activity:'夏日折扣加碼', points:38, status:'未領取', sBadge:'gray', dispStatus:'已發放', dsBadge:'green', claimedAt:null, expiresAt:'2026-08-14T23:59', orderAmount:1520},
+    {sentAt:'2026-05-13T02:15', orderId:'SL2026051300044', member:'葉淑芬', email:'ye***@gmail.com', activity:'會員回饋日', points:50, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-13T12:08', expiresAt:'2026-08-13T23:59', orderAmount:980},
+    {sentAt:'2026-05-12T02:15', orderId:'SL2026051200031', member:'郭明翰', email:'ku***@gmail.com', activity:'3C 加碼回饋', points:96, status:'已領取', sBadge:'green', dispStatus:'已發放', dsBadge:'green', claimedAt:'2026-05-12T22:14', expiresAt:'2026-08-12T23:59', orderAmount:2400}
   ];
   let sortKey = 'sentAt'; let sortDir = 'desc';
   function sortLedger(key){
@@ -1609,6 +1343,7 @@
         <td>${r.member}<div class="muted">${r.email}</div></td>
         <td>${r.activity}</td>
         <td class="cell-strong">${r.points}</td>
+        <td><span class="badge ${r.dsBadge}">${r.dispStatus}</span></td>
         <td><span class="badge ${statusColor}">${r.status}</span></td>
         <td>${r.claimedAt ? fmtDT(r.claimedAt) : '<span class="muted">—</span>'}</td>
         <td>${fmtDT(r.expiresAt)}</td>
@@ -1622,8 +1357,9 @@
 
   function clearLedgerFilter(){
     document.getElementById('f-status').selectedIndex = 0;
+    document.getElementById('f-disp-status').selectedIndex = 0;
     document.getElementById('f-camp').selectedIndex = 0;
-    document.querySelectorAll('#tab-ledger .input').forEach(i=>{ if(i.type!=='date') i.value=''; });
+    document.querySelectorAll('#view-ledger .input').forEach(i=>{ if(i.type!=='date') i.value=''; });
   }
 
   /* Order Detail Modal */
@@ -1671,8 +1407,6 @@
     const completedAt = fmtDT(new Date(new Date(r.sentAt).getTime() - 7*86400000));
     const createdAt   = fmtDT(new Date(new Date(r.sentAt).getTime() - 9*86400000));
     // points breakdown — randomly split into prepaid vs deposited for demo
-    const prepaidPts  = r.points > 10 ? Math.floor(r.points * 0.3) : 0;
-    const depositPts  = r.points - prepaidPts;
     document.getElementById('od-title').textContent = `發放詳情 ─ #${r.orderId}`;
     document.getElementById('od-body').innerHTML = `
       <div class="detail-section">
@@ -1720,14 +1454,10 @@
         <div class="detail-row"><div class="k">領取時間</div><div class="v">${r.claimedAt ? fmtDT(r.claimedAt) : '-'}</div></div>
         <div class="detail-row"><div class="k">到期時間</div><div class="v">${fmtDT(r.expiresAt)}</div></div>
         <div style="background:#F9FAFB;border:1px dashed var(--border);border-radius:6px;padding:12px 14px;margin-top:8px">
-          <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">點數來源明細（共 ${r.points} 點）</div>
-          <div class="detail-row" style="padding:4px 0">
-            <div class="k" style="min-width:140px">儲值點數發放</div>
-            <div class="v"><strong>${depositPts} 點</strong></div>
-          </div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">點數明細</div>
           <div class="detail-row" style="padding:4px 0;border-bottom:none">
-            <div class="k" style="min-width:140px">預支點數發放</div>
-            <div class="v">${prepaidPts > 0 ? `<strong style="color:var(--warning)">${prepaidPts} 點</strong>` : '<span style="color:var(--text-3)">0 點</span>'}</div>
+            <div class="k" style="min-width:140px">發放點數</div>
+            <div class="v"><strong>${r.points} 點</strong><span style="font-size:11px;color:var(--text-3);margin-left:8px">月結預支</span></div>
           </div>
         </div>
       </div>
