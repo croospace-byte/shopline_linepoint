@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOPLINE × LINE POINTS 購物回饋｜前台 Prototype v0.6</title>
+<style>
+/*
+  色票說明
+  ─────────────────────────────
+  商家品牌（灰白藍）
+    主色  #2D76EE
+    深色  #1a56cc
+    淺底  #EBF2FD
+    邊框  #AECDF8
+
+  LINE POINTS
+    主色  #00B900
+    深色  #007A00
+    淺底  #E6F7E6
+    邊框  #99DC99
+  ─────────────────────────────
+*/
+
+:root {
+  --brand:        #2D76EE;
+  --brand-dark:   #1a56cc;
+  --brand-light:  #EBF2FD;
+  --brand-border: #AECDF8;
+  --lp:           #00B900;
+  --lp-dark:      #007A00;
+  --lp-light:     #E6F7E6;
+  --lp-border:    #99DC99;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; }
+.proto { width: 100%; position: relative; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HEADER ── */
+.ann-bar { background: var(--brand-light); color: var(--brand-dark); text-align: center; padding: 7px; font-size: 12px; font-weight: 500; border-bottom: 1px solid var(--brand-border); }
+.site-header { border-bottom: 1px solid #e5e5e5; padding: 0 32px; background: #fff; }
+.header-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 0 4px; font-size: 12px; color: #666; }
+.header-logo { font-size: 16px; font-weight: 600; letter-spacing: 0.08em; color: #1a1a1a; }
+.header-top-right { display: flex; gap: 16px; align-items: center; }
+.cart-btn { display: flex; align-items: center; gap: 4px; cursor: pointer; background: none; border: none; font-size: 12px; color: #444; padding: 4px 8px; border-radius: 4px; }
+.cart-btn:hover { background: var(--brand-light); color: var(--brand); }
+.nav-bar { display: flex; border-top: 1px solid #e5e5e5; margin-top: 4px; }
+.nav-item { padding: 10px 16px; font-size: 12px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.nav-item.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 500; }
+.nav-item:hover { color: var(--brand); }
+.main-content { padding: 20px 32px; min-height: 500px; }
+
+/* ── LIST PAGE ── */
+.page-subtitle { font-size: 12px; color: #888; margin-bottom: 16px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.pcard { cursor: pointer; border: 1px solid #e5e5e5; border-radius: 4px; overflow: hidden; transition: border-color 0.15s; }
+.pcard:hover { border-color: var(--brand-border); }
+.pcard-img { background: #f7f9fc; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; }
+.category-badge { position: absolute; top: 8px; left: 8px; background: var(--brand); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 2px; }
+/* LINE POINTS badge on list */
+.lp-list-badge { position: absolute; bottom: 8px; right: 8px; background: var(--lp-light); color: var(--lp-dark); border: 1px solid var(--lp-border); font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 3px; display: flex; align-items: center; gap: 4px; }
+.dot-g { width: 7px; height: 7px; border-radius: 50%; background: var(--lp); flex-shrink: 0; }
+.pcard-body { padding: 10px 12px 14px; }
+.pcard-name { font-size: 12px; margin-bottom: 5px; line-height: 1.4; }
+.pcard-price { font-size: 13px; font-weight: 600; }
+.pcard-price-orig { font-size: 11px; color: #999; text-decoration: line-through; margin-left: 4px; font-weight: 400; }
+.pcard-atc { width: 100%; margin-top: 10px; padding: 8px; background: var(--brand); color: #fff; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; }
+.pcard-atc:hover { background: var(--brand-dark); }
+
+/* ── PDP ── */
+.breadcrumb { font-size: 11px; color: #888; margin-bottom: 16px; }
+.breadcrumb span { cursor: pointer; color: var(--brand); }
+.breadcrumb span:hover { text-decoration: underline; }
+.pdp-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.pdp-main-img { background: #f7f9fc; border: 1px solid #e5e5e5; border-radius: 4px; height: 340px; display: flex; align-items: center; justify-content: center; font-size: 90px; margin-bottom: 8px; }
+.pdp-thumbs { display: flex; gap: 6px; }
+.pdp-thumb { width: 60px; height: 60px; background: #f7f9fc; border: 1px solid #e5e5e5; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+.pdp-thumb.sel { border-color: var(--brand); }
+.pdp-name { font-size: 20px; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+.pdp-price { font-size: 22px; font-weight: 600; margin-bottom: 14px; }
+.pdp-desc { font-size: 12px; color: #555; line-height: 1.7; margin-bottom: 10px; }
+.pdp-attrs { font-size: 12px; color: #666; margin-bottom: 16px; line-height: 2; }
+
+/* ── LINE POINTS card on PDP ── */
+.lp-card { border: 1px solid var(--lp-border); background: var(--lp-light); border-radius: 6px; padding: 10px 13px; margin-bottom: 14px; }
+.lp-card-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+.lp-card-title { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--lp-dark); white-space: nowrap; }
+.lp-card-note { font-size: 10px; color: #555; text-align: right; }
+.lp-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 11px; }
+.lp-row-left { color: #555; }
+.lp-row-right { display: flex; align-items: center; gap: 5px; color: var(--lp-dark); font-weight: 600; flex-shrink: 0; margin-left: 8px; position: relative; }
+
+/* tooltip */
+.q-btn { width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--lp); color: var(--lp-dark); font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: default; position: relative; }
+.q-btn .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); right: 0; background: #1a1a1a; color: #fff; font-size: 10px; font-weight: 400; padding: 7px 9px; border-radius: 4px; width: 190px; line-height: 1.6; z-index: 100; white-space: normal; }
+.q-btn:hover .tooltip { display: block; }
+
+.lp-extra { display: none; }
+.lp-extra.open { display: block; }
+.lp-more-btn { display: block; width: 100%; text-align: center; font-size: 11px; color: var(--lp-dark); background: none; border: none; cursor: pointer; padding: 5px 0 2px; }
+.lp-more-btn:hover { text-decoration: underline; }
+
+/* ── existing promo block ── */
+.promo-block { border: 1px solid #e0e0e0; border-radius: 4px; padding: 9px 13px; margin-bottom: 12px; font-size: 11px; color: #666; line-height: 1.7; }
+.promo-tag { display: inline-block; background: #f0f0f0; border: 1px solid #e0e0e0; border-radius: 3px; padding: 1px 6px; font-size: 10px; margin-right: 6px; color: #666; }
+.see-more { color: var(--brand); cursor: pointer; font-size: 11px; }
+.swatch-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.swatch { padding: 4px 13px; border: 1px solid #ccc; border-radius: 3px; font-size: 11px; cursor: pointer; }
+.swatch.sel { border-color: var(--brand); color: var(--brand); }
+.qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 12px; color: #666; }
+.qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden; }
+.qty-ctrl button { width: 32px; height: 34px; border: none; background: none; cursor: pointer; font-size: 18px; color: #666; }
+.qty-ctrl button:hover { background: #f5f5f5; }
+.qty-ctrl span { width: 38px; text-align: center; font-size: 13px; border-left: 1px solid #e5e5e5; border-right: 1px solid #e5e5e5; line-height: 34px; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.pdp-atc { padding: 11px; background: var(--brand); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.pdp-atc:hover { background: var(--brand-dark); }
+.pdp-buy { padding: 11px; background: #d4a017; color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.pdp-buy:hover { background: #b8880f; }
+.social-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #888; margin-top: 6px; }
+.social-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+/* ── MINI CART ── */
+.mini-cart { display: none; position: fixed; top: 88px; right: 32px; width: 250px; background: #fff; border: 1px solid #ccc; border-radius: 6px; z-index: 500; overflow: hidden; box-shadow: 0 4px 16px rgba(45,118,238,0.12); }
+.mini-cart.open { display: block; }
+.mini-cart-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #eee; }
+.mini-cart-thumb { width: 46px; height: 46px; background: #f7f9fc; border: 1px solid #eee; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.mini-cart-name { font-size: 11px; font-weight: 500; line-height: 1.4; margin-bottom: 2px; }
+.mini-cart-qty { font-size: 11px; color: #888; }
+.mini-cart-lp { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--lp-light); border-bottom: 1px solid var(--lp-border); font-size: 11px; color: var(--lp-dark); font-weight: 500; }
+.mini-cart-total { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; font-size: 12px; font-weight: 600; border-bottom: 1px solid #eee; }
+.mini-cart-total span:first-child { font-weight: 400; color: #666; font-size: 11px; }
+.mini-cart-btn { display: block; width: 100%; padding: 11px; background: var(--brand); color: #fff; border: none; font-size: 12px; font-weight: 500; cursor: pointer; }
+.mini-cart-btn:hover { background: var(--brand-dark); }
+
+/* ── CHECKOUT ── */
+.checkout-steps { display: flex; justify-content: center; margin-bottom: 22px; position: relative; max-width: 500px; margin-left: auto; margin-right: auto; }
+.checkout-steps::before { content: ''; position: absolute; top: 14px; left: 20%; right: 20%; height: 1px; background: #e0e0e0; }
+.step { text-align: center; flex: 1; }
+.step-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; margin: 0 auto 4px; position: relative; z-index: 1; }
+.step.cur .step-circle { background: var(--brand); color: #fff; }
+.step.todo .step-circle { background: #f0f0f0; color: #999; border: 1px solid #ddd; }
+.step-label { font-size: 11px; color: #999; }
+.step.cur .step-label { color: var(--brand); font-weight: 500; }
+
+/* checkout sections */
+.sec { border: 1px solid #e5e5e5; border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+.sec-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #f7f9fc; border-bottom: 1px solid #e5e5e5; font-size: 12px; font-weight: 500; }
+.sec-sub { padding: 7px 16px; font-size: 11px; color: #888; background: #fafcff; border-bottom: 1px solid #e5e5e5; }
+
+/* cart table */
+.cart-table { width: 100%; border-collapse: collapse; }
+.cart-table th { padding: 7px 16px; font-size: 10px; color: #888; font-weight: 400; border-bottom: 1px solid #e5e5e5; text-align: left; }
+.cart-table th:not(:first-child) { text-align: center; }
+.cart-table td { padding: 14px 16px; font-size: 11px; vertical-align: middle; }
+.cart-table td:not(:first-child) { text-align: center; }
+.cart-prod-cell { display: flex; align-items: center; gap: 12px; }
+.cart-prod-thumb { width: 50px; height: 50px; background: #f7f9fc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.cart-prod-name { font-size: 11px; font-weight: 500; line-height: 1.4; }
+.cart-qty-ctrl { display: inline-flex; align-items: center; border: 1px solid #ccc; border-radius: 3px; overflow: hidden; }
+.cart-qty-ctrl button { width: 26px; height: 28px; border: none; background: none; cursor: pointer; font-size: 14px; color: #666; }
+.cart-qty-ctrl button:hover { background: #f5f5f5; }
+.cart-qty-ctrl span { width: 32px; text-align: center; font-size: 12px; border-left: 1px solid #eee; border-right: 1px solid #eee; line-height: 28px; }
+
+/* LINE POINTS block in checkout */
+.lp-checkout-block { background: var(--lp-light); border: 1px solid var(--lp-border) !important; }
+.lp-checkout-sec-header { display: flex; align-items: center; padding: 10px 16px; background: #cceacc; border-bottom: 1px solid var(--lp-border); font-size: 12px; font-weight: 500; color: var(--lp-dark); }
+.lp-checkout-body { padding: 12px 16px; display: flex; align-items: flex-start; gap: 8px; }
+.lp-checkout-main { font-size: 12px; font-weight: 600; color: var(--lp-dark); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+.lp-checkout-sub { font-size: 10px; color: #3a5a3a; margin-bottom: 2px; }
+
+/* promo */
+.promo-used-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #666; }
+.promo-more-row { font-size: 11px; color: #666; }
+
+/* bottom two-col */
+.checkout-bottom { display: grid; grid-template-columns: 1fr 290px; gap: 12px; }
+.form-label-s { font-size: 10px; color: #888; margin-bottom: 4px; }
+.form-select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 3px; font-size: 11px; background: #fff; color: #1a1a1a; margin-bottom: 10px; }
+.form-select:focus { outline: none; border-color: var(--brand); }
+.shipping-opt-label { font-size: 11px; font-weight: 500; color: var(--brand); margin-bottom: 8px; }
+.shipping-note { font-size: 10px; color: #aaa; line-height: 1.6; margin-top: 4px; }
+.next-btn { width: 100%; padding: 12px; background: var(--lp); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+.next-btn:hover { background: var(--lp-dark); }
+.os-row { display: flex; justify-content: space-between; font-size: 11px; color: #888; padding: 3px 0; }
+.os-row.total { font-size: 14px; font-weight: 600; color: #1a1a1a; border-top: 1px solid #e5e5e5; padding-top: 9px; margin-top: 5px; }
+.os-link { color: var(--brand); font-size: 11px; cursor: pointer; display: block; padding: 3px 0; }
+.os-checkout-btn { width: 100%; padding: 11px; background: #ccc; color: #fff; border: none; border-radius: 4px; font-size: 12px; font-weight: 500; margin-top: 10px; cursor: default; }
+</style>
+</head>
+<body>
+
+<div class="proto">
+
+<div class="ann-bar">超取滿 $990，享免運優惠！！</div>
+<div class="site-header">
+  <div class="header-top">
+    <div style="display:flex;gap:14px;align-items:center;font-size:12px;color:#666;">
+      <span>🌐 繁體中文</span>
+      <span>$ TWD</span>
+    </div>
+    <div class="header-logo">DEMO STORE</div>
+    <div class="header-top-right">
+      <span style="font-size:12px;color:#444;cursor:pointer;">👤 我的帳戶</span>
+      <button class="cart-btn" onclick="openMiniCart()">🛒 購物車（1）</button>
+      <span style="font-size:12px;color:#444;cursor:pointer;">🔍 找商品</span>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <div class="nav-item" onclick="goPage('list')">首頁</div>
+    <div class="nav-item active" onclick="goPage('list')">所有商品</div>
+    <div class="nav-item">2026 端午禮盒</div>
+    <div class="nav-item">港澳專區</div>
+    <div class="nav-item">門市資訊</div>
+    <div class="nav-item">媒體報導</div>
+  </nav>
+</div>
+
+<!-- ═══ PAGE: LIST ═══ -->
+<div id="page-list" class="page active">
+  <div class="main-content">
+    <div class="page-subtitle">所有商品（8）</div>
+    <div class="product-grid">
+
+      <div class="pcard" onclick="goPage('pdp')">
+        <div class="pcard-img">
+          <div class="category-badge">葷食</div>
+          📦
+          <div class="lp-list-badge"><div class="dot-g"></div>5%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">【端午禮盒】酥脆肉鬆捲 12入</div>
+          <div class="pcard-price">NT$299 <span class="pcard-price-orig">NT$329</span></div>
+          <button class="pcard-atc" onclick="event.stopPropagation();openMiniCart()">加入購物車</button>
+        </div>
+      </div>
+
+      <div class="pcard" onclick="goPage('pdp')">
+        <div class="pcard-img">
+          <div class="category-badge">蛋奶素</div>
+          🎁
+          <div class="lp-list-badge"><div class="dot-g"></div>5%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">【端午禮盒】綜合小月餅 9入</div>
+          <div class="pcard-price">NT$495 <span class="pcard-price-orig">NT$525</span></div>
+          <button class="pcard-atc" onclick="event.stopPropagation();openMiniCart()">加入購物車</button>
+        </div>
+      </div>
+
+      <div class="pcard" onclick="goPage('pdp')">
+        <div class="pcard-img">
+          <div class="category-badge">奶素</div>
+          🥮
+          <div class="lp-list-badge"><div class="dot-g"></div>5%</div>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">【端午禮盒】芋頭麻糬酥</div>
+          <div class="pcard-price">NT$350 – NT$660 <span class="pcard-price-orig">NT$690</span></div>
+          <button class="pcard-atc" onclick="event.stopPropagation();openMiniCart()">加入購物車</button>
+        </div>
+      </div>
+
+      <div class="pcard" onclick="goPage('pdp')">
+        <div class="pcard-img">
+          <div class="category-badge">蛋奶素</div>
+          🍪
+          <div class="lp-list-badge"><div class="dot-g"></div>50 點</div>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">【端午禮盒】鳳凰流心酥</div>
+          <div class="pcard-price">NT$270 – NT$500 <span class="pcard-price-orig">NT$530</span></div>
+          <button class="pcard-atc" onclick="event.stopPropagation();openMiniCart()">加入購物車</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: PDP ═══ -->
+<div id="page-pdp" class="page">
+  <div class="main-content">
+    <div class="breadcrumb"><span onclick="goPage('list')">全部商品</span> &gt; 所有商品</div>
+    <div class="pdp-layout">
+
+      <!-- Gallery -->
+      <div>
+        <div class="pdp-main-img">🍪</div>
+        <div class="pdp-thumbs">
+          <div class="pdp-thumb sel">🍪</div>
+          <div class="pdp-thumb">🍪</div>
+          <div class="pdp-thumb">🍪</div>
+          <div class="pdp-thumb">🍪</div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div>
+        <div class="pdp-name">【5盒免運】杜拜巧克力Q餅 4入</div>
+        <div class="pdp-price">NT$499</div>
+        <div class="pdp-desc">
+          杜拜巧克力Q餅熱銷限量好評不斷，使用特製杜拜巧克力餡，嚴選頂級開心果醬與手工烘烤金黃脆絲製作，內餡濃郁香醇，酥脆不甜膩，極致香草口感令人難以忘懷。
+        </div>
+        <div class="pdp-attrs">
+          · 內容物：杜拜巧克力餅×4顆<br>
+          · 葷素：葷食<br>
+          · 保存期限：冷藏7天
+        </div>
+
+        <!-- LINE POINTS card -->
+        <div class="lp-card">
+          <div class="lp-card-header">
+            <div class="lp-card-title"><div class="dot-g"></div>LINE POINT 回饋</div>
+            <div class="lp-card-note">每筆訂單僅適用一項回饋</div>
+          </div>
+          <div class="lp-row">
+            <span class="lp-row-left">06/30 止｜所有訂單</span>
+            <div class="lp-row-right">
+              <div class="dot-g"></div>5%
+              <div class="q-btn">?<div class="tooltip">計算基數：商品成交價<br>發放時機：訂單完成後 7 天<br>同筆訂單僅適用一項回饋</div></div>
+            </div>
+          </div>
+          <div class="lp-row">
+            <span class="lp-row-left">07/31 止｜訂單滿 NT$800</span>
+            <div class="lp-row-right">
+              <div class="dot-g"></div>50 點
+              <div class="q-btn">?<div class="tooltip">計算基數：固定點數<br>發放時機：訂單完成後 7 天<br>同筆訂單僅適用一項回饋</div></div>
+            </div>
+          </div>
+          <div class="lp-extra" id="lp-extra">
+            <div class="lp-row">
+              <span class="lp-row-left">08/31 止｜指定商品（本品）</span>
+              <div class="lp-row-right">
+                <div class="dot-g"></div>30 點
+                <div class="q-btn">?<div class="tooltip">計算基數：固定點數<br>發放時機：訂單完成後 7 天<br>同筆訂單僅適用一項回饋</div></div>
+              </div>
+            </div>
+          </div>
+          <button class="lp-more-btn" id="lp-more-btn" onclick="toggleLpMore()">↓ 更多回饋</button>
+        </div>
+
+        <!-- 既有優惠 -->
+        <div class="promo-block">
+          <div style="margin-bottom:5px;"><span class="promo-tag">優惠促銷</span>至 05/30 00:00 截止｜滿 2400 免運 → 5/8 後出貨</div>
+          <div><span class="promo-tag">優惠促銷</span>至 06/16 00:00 截止｜滿 3000 免運（含冷凍）</div>
+          <div style="text-align:right;margin-top:5px;"><span class="see-more">查看更多 ∨</span></div>
+        </div>
+
+        <div style="font-size:12px;color:#888;margin-bottom:8px;">顏色：1盒</div>
+        <div class="swatch-row"><div class="swatch sel">1盒</div></div>
+        <div class="qty-row">
+          數量
+          <div class="qty-ctrl">
+            <button onclick="changeQty(-1)">−</button>
+            <span id="pdp-qty">1</span>
+            <button onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="pdp-atc" onclick="addToCart()">加入購物車</button>
+          <button class="pdp-buy">🛍 立即購買</button>
+        </div>
+        <div class="social-row">
+          ♡ 加入追蹤清單 &nbsp;|&nbsp; 分享
+          <div class="social-icon" style="background:#06C755;color:#fff;">L</div>
+          <div class="social-icon" style="background:#1877F2;color:#fff;">f</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: CHECKOUT ═══ -->
+<div id="page-checkout" class="page">
+  <div class="main-content">
+
+    <!-- Steps -->
+    <div class="checkout-steps">
+      <div class="step cur"><div class="step-circle">1</div><div class="step-label">購物車</div></div>
+      <div class="step todo"><div class="step-circle">2</div><div class="step-label">填寫資料</div></div>
+      <div class="step todo"><div class="step-circle">3</div><div class="step-label">訂單確認</div></div>
+    </div>
+
+    <!-- ① 商品 -->
+    <div class="sec">
+      <div class="sec-header">
+        購物車
+        <div style="display:flex;gap:10px;color:#aaa;font-size:13px;cursor:pointer;">⤴ −</div>
+      </div>
+      <div class="sec-sub">常溫（1）</div>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>商品資料</th>
+            <th>優惠</th>
+            <th>單件價格</th>
+            <th>數量</th>
+            <th>小計</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="cart-prod-cell">
+                <div class="cart-prod-thumb">🍪</div>
+                <div class="cart-prod-name">【5盒免運】杜拜巧克力Q餅 4入</div>
+              </div>
+            </td>
+            <td style="font-size:10px;color:#aaa;">—</td>
+            <td>NT$499</td>
+            <td><div class="cart-qty-ctrl"><button>−</button><span>1</span><button>+</button></div></td>
+            <td style="font-weight:600;">NT$499</td>
+            <td style="cursor:pointer;color:#aaa;">✕</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ② 回饋 -->
+    <div class="sec lp-checkout-block">
+      <div class="lp-checkout-sec-header">
+        <div style="display:flex;align-items:center;gap:6px;"><div class="dot-g"></div>LINE POINT 回饋</div>
+      </div>
+      <div class="lp-checkout-body">
+        <div>
+          <div class="lp-checkout-main"><div class="dot-g"></div>預估可得回饋 LINE POINT 25 點</div>
+          <div class="lp-checkout-sub">已套用可領取最多點數之回饋活動（所有訂單 5%）</div>
+          <div class="lp-checkout-sub">訂單完成後 7 天後發送領取連結</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 既有優惠 -->
+    <div class="sec">
+      <div class="sec-header">優惠 <span style="font-size:13px;color:#aaa;cursor:pointer;">∧</span></div>
+      <div style="padding:10px 16px;border-bottom:1px solid #eee;">
+        <div style="font-size:10px;color:#888;margin-bottom:6px;">已享用之優惠</div>
+        <div class="promo-used-row">
+          <span class="promo-tag">常溫·免運優惠</span>
+          【超取】滿 990 免運 → 常溫/冷凍都會分開計算
+          <span style="margin-left:auto;color:#ccc;">−</span>
+        </div>
+      </div>
+      <div style="padding:10px 16px;">
+        <div style="font-size:10px;color:#888;margin-bottom:6px;">
+          尚有更多精彩優惠等著你！目前未享用：
+          <span style="float:right;color:var(--brand);cursor:pointer;">繼續購物</span>
+        </div>
+        <div class="promo-more-row">
+          <span class="promo-tag">優惠促銷</span>
+          端午訂購大量優惠：滿 15,000 享 95 折，滿 36,000 享 9 折，滿 51,000 享 85 折
+          <span style="color:var(--brand);cursor:pointer;margin-left:4px;">再買 NT$13,760 即享有優惠</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 底部兩欄 -->
+    <div class="checkout-bottom">
+
+      <!-- 付款 / 送貨 -->
+      <div class="sec" style="margin-bottom:0;">
+        <div class="sec-header">選擇付款類型與送貨方式</div>
+        <div style="padding:14px 16px;">
+          <div class="form-label-s">國家/地區</div>
+          <select class="form-select"><option>台灣</option></select>
+          <div class="shipping-opt-label">常溫</div>
+          <div class="form-label-s">送貨方式</div>
+          <select class="form-select">
+            <option>【7-11】取貨不付款（滿 $990 免運）</option>
+            <option>宅配（常溫）</option>
+          </select>
+          <div class="shipping-note">
+            *1. 超商系統【指定日期出貨】，下單後 4-7 天送達（不含假日）。<br>
+            *2. 超商【選定後就無法更改】，如要更改請取消，重選定再次訂購。
+          </div>
+          <button class="next-btn">下一步</button>
+        </div>
+      </div>
+
+      <!-- 訂單資訊 -->
+      <div class="sec" style="margin-bottom:0;">
+        <div class="sec-header">訂單資訊</div>
+        <div style="padding:14px 16px;">
+          <div class="os-row"><span>小計</span><span>NT$499</span></div>
+          <div class="os-row"><span>常溫運費</span><span>免運</span></div>
+          <a class="os-link">使用推薦代碼</a>
+          <a class="os-link">使用優惠代碼</a>
+          <div class="os-row total"><span>合計</span><span>NT$499</span></div>
+          <div class="form-label-s" style="margin-top:12px;">付款方式</div>
+          <select class="form-select">
+            <option>ATM 虛擬代碼繳費</option>
+            <option>信用卡</option>
+            <option>LINE Pay</option>
+          </select>
+          <button class="os-checkout-btn">前往結帳</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div><!-- /proto -->
+
+<!-- ═══ MINI CART ═══ -->
+<div class="mini-cart" id="mini-cart">
+  <div class="mini-cart-row">
+    <div class="mini-cart-thumb">🍪</div>
+    <div style="flex:1;">
+      <div class="mini-cart-name">【5盒免運】杜拜巧克力Q餅 4入</div>
+      <div class="mini-cart-qty">1 × NT$499</div>
+    </div>
+  </div>
+  <div class="mini-cart-lp"><div class="dot-g"></div>預估可得 LINE POINT 25 點</div>
+  <div class="mini-cart-total"><span>合計</span><span>NT$499</span></div>
+  <button class="mini-cart-btn" onclick="goCheckout()">訂單結帳</button>
+</div>
+
+<script>
+function goPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  closeMiniCart();
+  window.scrollTo(0, 0);
+}
+function openMiniCart() { document.getElementById('mini-cart').classList.add('open'); }
+function closeMiniCart() { document.getElementById('mini-cart').classList.remove('open'); }
+function addToCart() { openMiniCart(); }
+function goCheckout() { closeMiniCart(); goPage('checkout'); }
+function changeQty(d) {
+  var el = document.getElementById('pdp-qty');
+  el.textContent = Math.max(1, parseInt(el.textContent) + d);
+}
+function toggleLpMore() {
+  var extra = document.getElementById('lp-extra');
+  var btn = document.getElementById('lp-more-btn');
+  if (extra.classList.contains('open')) {
+    extra.classList.remove('open'); btn.textContent = '↓ 更多回饋';
+  } else {
+    extra.classList.add('open'); btn.textContent = '↑ 收合';
+  }
+}
+document.addEventListener('click', function(e) {
+  var cart = document.getElementById('mini-cart');
+  if (cart.classList.contains('open') && !cart.contains(e.target) && !e.target.closest('.cart-btn')) {
+    closeMiniCart();
+  }
+});
+</script>
+
+</body>
+</html>
